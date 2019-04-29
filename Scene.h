@@ -11,6 +11,8 @@ typedef float (*DE)(const vec3&);
 
 class Scene {
 public:
+    bool debug = false;
+
     Scene(Camera &_camera, std::vector<Light> &_lights, DE _de, int _max_depth, vec3 &_background, vec3 &_ambience);
     Image render();
     vec3 trace(const Ray& _ray, int _depth);

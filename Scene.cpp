@@ -22,6 +22,8 @@ vec3 Scene::trace(const Ray& _ray, int _depth) {
 
     float dist;
     if (intersect(_ray, dist)) {
+        if (debug) return vec3(1);
+
         vec3 point = _ray(dist);
         vec3 normal = estimate_normal(point);
         vec3 color = lighting(point, normal, normalize(camera.eye - point));
