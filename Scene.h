@@ -11,9 +11,7 @@ typedef float (*DE)(const vec3&);
 
 class Scene {
 public:
-    bool debug = false;
-
-    Scene(Camera &_camera, std::vector<Light> &_lights, DE _de, int _max_depth, vec3 &_background, vec3 &_ambience);
+    Scene(Camera &_camera, std::vector<Light> &_lights, DE _de, int _max_depth, vec3 &_background, vec3 &_ambience, bool _debug);
     Image render();
     vec3 trace(const Ray& _ray, int _depth);
     bool intersect(const Ray& _ray, float &_distance);
@@ -27,11 +25,13 @@ private:
     int max_depth;
     vec3 background;
     vec3 ambience;
+    bool debug;
 
     int max_ray_steps = 500;
     float min_distance = 0.0001f;
+    float max_distance = 100;
     float normal_distance = 0.0001f;
-    Material material = Material(vec3(0.5), vec3(0.5), vec3(1), 100, 0.3);
+    Material material = Material(vec3(0.7), vec3(0.7), vec3(1), 50, 0);
 };
 
 #endif

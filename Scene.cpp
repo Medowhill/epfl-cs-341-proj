@@ -2,8 +2,8 @@
 
 #include "Ray.h"
 
-Scene::Scene(Camera &_camera, std::vector<Light> &_lights, DE _de, int _max_depth, vec3 &_background, vec3 &_ambience) :
-    camera(_camera), lights(_lights), de(_de), max_depth(_max_depth), background(_background), ambience(_ambience) {}
+Scene::Scene(Camera &_camera, std::vector<Light> &_lights, DE _de, int _max_depth, vec3 &_background, vec3 &_ambience, bool _debug) :
+    camera(_camera), lights(_lights), de(_de), max_depth(_max_depth), background(_background), ambience(_ambience), debug(_debug) {}
 
 Image Scene::render() {
     Image img(camera.width, camera.height);
@@ -30,7 +30,7 @@ vec3 Scene::trace(const Ray& _ray, int _depth) {
 
         if (material.mirror != 0) {
             vec3 direction = reflect(_ray.direction, normal);
-            vec3 origin = point + direction * 0.001;
+            vec3 origin = point + direction * 0.01;
             Ray reflected_ray(origin, direction);
             return (1 - material.mirror) * color + material.mirror * trace(reflected_ray, _depth + 1);
         } else return color;
@@ -43,6 +43,7 @@ bool Scene::intersect(const Ray& _ray, float &_distance) {
     for (steps = 0; steps < max_ray_steps; steps++) {
         float d = de(_ray(_distance));
         _distance += d;
+        if (_distance > max_distance) return false;
         if (d < min_distance) break;
     }
     return steps != max_ray_steps;

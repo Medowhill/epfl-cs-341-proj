@@ -1,31 +1,50 @@
 #include "Scene.h"
 #include "Image.h"
 #include "Light.h"
+#include "StopWatch.h"
+#include "tetra.h"
 
 #include <string>
 #include <vector>
+#include <array>
+
+#define TETRA_HELPER(a) d = norm(p - a); \
+                        if (d < dist) { \
+                            c = a; \
+                            dist = d; \
+                        }
 
 float sphere_de(const vec3 &_point);
 float spheres_3_de(const vec3 &_point);
 float spheres_many_de(const vec3 &_point);
+float tetra_de(const vec3 &_point);
 
-int main() {
-    vec3 eye(1, 3, 8), center(1, 1, 0), up(0, 1, 0);
+int main(int argc, char **argv) {
+    if (argc <= 1) return 1;
+
+    vec3 eye(3, 4, 5), center(0, 0, 0), up(0, 1, 0);
     double fovy = 45, width = 500, height = 500;
     Camera camera(eye, center, up, fovy, width, height);
 
     std::vector<Light> lights;
-    vec3 pos1(0, 50, 0), pos2(50, 50, 50), pos3(-50, 50, 50), color(0.35);
+    vec3 pos1(0, 50, 0), pos2(50, 50, 50), pos3(-50, 50, 50), color(0.33);
     lights.push_back(Light(pos1, color));
     lights.push_back(Light(pos2, color));
     lights.push_back(Light(pos3, color));
 
     int depth = 5;
     vec3 ambience(0.2), background(0);
-    Scene s(camera, lights, spheres_many_de, depth, background, ambience);
+    std::array<DE, 4> des = { sphere_de, spheres_3_de, spheres_many_de, tetra_de };
+    Scene s(camera, lights, des[argv[1][0] - '0'], depth, background, ambience, argc > 2);
 
-//    s.debug = true;
+    StopWatch timer;
+    timer.start();
+
     Image img = s.render();
+
+    timer.stop();
+    std::cout << timer << "\n";
+
     img.write(std::string("test.tga"));
 }
 
@@ -44,4 +63,24 @@ float spheres_3_de(const vec3 &_point) {
 float spheres_many_de(const vec3 &_point) {
     vec3 np(round(_point[0]), 0, round(_point[2]));
     return norm(np - _point) - 0.3;
+}
+
+float tetra_de(const vec3 &_point) {
+    const int iter = 4;
+
+    vec3 p = _point;
+    vec3 a1(1, 1, 1), a2(-1, -1, 1), a3(1, -1, -1), a4(-1, 1, -1);
+
+    for (int i = 0; i < iter; i++) {
+        vec3 c = a1;
+        float dist = norm(p - a1), d;
+        TETRA_HELPER(a2);
+        TETRA_HELPER(a3);
+        TETRA_HELPER(a4);
+        p = 2 * p - c;
+    }
+
+    float d0 = tetra_distance(a1, a2, a3, a4, p) * pow(2, float(-iter));
+    float d1 = abs(dot(_point, vec3(0, 1, 0)) + 2);
+    return std::min(d0, d1);
 }
