@@ -56,13 +56,15 @@ float spheres_3_de(const vec3 &_point) {
     float d1 = norm(_point - vec3(0, 1, 0)) - 1;
     float d2 = norm(_point - vec3(-1, 0.5, 2)) - 0.5;
     float d3 = norm(_point - vec3(3, 2, 1.5)) - 2;
-    float d4 = dot(_point, vec3(0, 1, 0));
+    float d4 = abs(dot(_point, vec3(0, 1, 0)));
     return std::min(d1, std::min(d2, std::min(d3, d4)));
 }
 
 float spheres_many_de(const vec3 &_point) {
     vec3 np(round(_point[0]), 0, round(_point[2]));
-    return norm(np - _point) - 0.3;
+    float d0 = norm(np - _point) - 0.3;
+    float d1 = abs(dot(_point, vec3(0, 1, 0)) + 0.3);
+    return std::min(d0, d1);
 }
 
 float tetra_de(const vec3 &_point) {
