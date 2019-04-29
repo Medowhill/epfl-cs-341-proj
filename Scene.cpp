@@ -2,8 +2,8 @@
 
 #include "Ray.h"
 
-Scene::Scene(Camera &_camera, std::vector<Light> &_lights, int _max_depth, vec3 &_background, vec3 &_ambience) :
-    camera(_camera), lights(_lights), max_depth(_max_depth), background(_background), ambience(_ambience) {}
+Scene::Scene(Camera &_camera, std::vector<Light> &_lights, DE _de, int _max_depth, vec3 &_background, vec3 &_ambience) :
+    camera(_camera), lights(_lights), de(_de), max_depth(_max_depth), background(_background), ambience(_ambience) {}
 
 Image Scene::render() {
     Image img(camera.width, camera.height);
@@ -39,27 +39,19 @@ bool Scene::intersect(const Ray& _ray, float &_distance) {
     _distance = 0;
     int steps;
     for (steps = 0; steps < max_ray_steps; steps++) {
-        float d = estimate_distance(_ray(_distance));
+        float d = de(_ray(_distance));
         _distance += d;
         if (d < min_distance) break;
     }
     return steps != max_ray_steps;
 }
 
-float Scene::estimate_distance(const vec3& point) {
-    float d1 = norm(point - vec3(0, 1, 0)) - 1;
-    float d2 = norm(point - vec3(-1, 0.5, 2)) - 0.5;
-    float d3 = norm(point - vec3(3, 2, 1.5)) - 2;
-    float d4 = dot(point, vec3(0, 1, 0));
-    return std::min(d1, std::min(d2, std::min(d3, d4)));
-}
-
 vec3 Scene::estimate_normal(const vec3& point) {
     vec3 x(normal_distance, 0, 0), y(0, normal_distance, 0), z(0, 0, normal_distance);
     return normalize(vec3(
-        estimate_distance(point + x) - estimate_distance(point - x),
-        estimate_distance(point + y) - estimate_distance(point - y),
-        estimate_distance(point + z) - estimate_distance(point - z)));
+        de(point + x) - de(point - x),
+        de(point + y) - de(point - y),
+        de(point + z) - de(point - z)));
 }
 
 vec3 Scene::lighting(const vec3& _point, const vec3& _normal, const vec3& _view) {
