@@ -7,12 +7,11 @@
 
 class Image {
 private:
+    unsigned int width;
+    unsigned int height;
     std::vector<vec3> pixels_;
 
 public:
-    unsigned int width;
-    unsigned int height;
-
     Image(unsigned int _width, unsigned int _height);
     void resize(unsigned int _width, unsigned int _height);
     vec3& operator()(unsigned int _x, unsigned int _y);
