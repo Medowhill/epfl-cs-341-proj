@@ -59,11 +59,11 @@ vec3 Scene::estimate_normal(const vec3& point) {
 
 vec3 Scene::lighting(const vec3& _point, const vec3& _normal, const vec3& _view) {
     vec3 color = ambience * material.ambient;
-    
+
     for (Light &light: lights) {
       vec3 l = normalize(light.position - _point);
       vec3 r = mirror(l, _normal);
-      Ray shadow_ray(_point + 0.001 * l, l);
+      Ray shadow_ray(_point + 0.1 * l, l);
 
       float t;
       if (!(intersect(shadow_ray,  t) && t < norm(_point - light.position))) {

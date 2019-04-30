@@ -19,23 +19,29 @@ float spheres_3_de(const vec3 &_point);
 float spheres_many_de(const vec3 &_point);
 float tetra_de(const vec3 &_point);
 float mandelbulb_de(const vec3 &_point);
+float julia_de(const vec3 &_point);
 
 int main(int argc, char **argv) {
     if (argc <= 1) return 1;
 
-    vec3 eye(3, 4, 5), center(0, 0, 0), up(0, 1, 0);
+    vec3 eye(-1.5, 0, 3), center(0, 0, 0), up(0, 1, 0);
     double fovy = 45, width = 500, height = 500;
     Camera camera(eye, center, up, fovy, width, height);
 
     std::vector<Light> lights;
-    vec3 pos1(0, 50, 0), pos2(50, 50, 50), pos3(-50, 50, 50), color(0.33);
-    lights.push_back(Light(pos1, color));
-    lights.push_back(Light(pos2, color));
-    lights.push_back(Light(pos3, color));
+//    vec3 pos1(0, 50, 0), pos2(50, 50, 50), pos3(-50, 50, 50), color(0.33);
+//    lights.push_back(Light(pos1, color));
+//    lights.push_back(Light(pos2, color));
+//    lights.push_back(Light(pos3, color));
+//    vec3 pos1(15, 15, 30), pos2(-30, 15, 30), color(0.5);
+//    lights.push_back(Light(pos1, color));
+//    lights.push_back(Light(pos2, color));
+    vec3 color(1);
+    lights.push_back(Light(eye, color));
 
     int depth = 5;
     vec3 ambience(0.2), background(0);
-    std::array<DE, 5> des = { sphere_de, spheres_3_de, spheres_many_de, tetra_de, mandelbulb_de };
+    std::array<DE, 6> des = { sphere_de, spheres_3_de, spheres_many_de, tetra_de, mandelbulb_de, julia_de };
     Scene s(camera, lights, des[argv[1][0] - '0'], depth, background, ambience, argc > 2);
 
     StopWatch timer;
@@ -109,6 +115,32 @@ float mandelbulb_de(const vec3 &_point) {
         phi *= power;
         float st = sin(theta), ct = cos(theta), sp = sin(phi), cp = cos(phi);
         p = pow(r, power) * vec3(st * cp, st * sp, ct) + _point;
+    }
+
+    return 0.5 * log(r) * r / dr;
+}
+
+float julia_de(const vec3 &_point) {
+    const int iter = 20;
+    const int bail_out = 100;
+    const vec3 d(0.6, -0.8 ,0.4);
+
+    vec3 p = _point;
+    float dr = 1, r;
+
+    for (int i = 0; i < iter; i++) {
+        r = norm(p);
+        if (r > bail_out) break;
+        if (r < 0.0001f) break;
+
+        float theta = acos(p[2] / r);
+        float phi = atan2(p[1], p[0]);
+        dr = 2 * r * dr;
+
+        theta *= 2;
+        phi *= 2;
+        float st = sin(theta), ct = cos(theta), sp = sin(phi), cp = cos(phi);
+        p = r * r * vec3(st * cp, st * sp, ct) + d;
     }
 
     return 0.5 * log(r) * r / dr;

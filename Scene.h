@@ -28,10 +28,10 @@ private:
     bool debug;
 
     int max_ray_steps = 500;
-    float min_distance = 0.0001f;
-    float max_distance = 100;
-    float normal_distance = 0.0001f;
-    Material material = Material(vec3(0.7), vec3(0.7), vec3(1), 50, 0);
+    float min_distance = 0.01f;
+    float max_distance = 10;
+    float normal_distance = 0.001f;
+    Material material = Material(vec3(0.6), vec3(0.6), vec3(1), 100, 0);
 };
 
 #endif

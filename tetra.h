@@ -76,7 +76,7 @@ float distance(const vec3& p0, const vec3& p1, const vec3& p2, const vec3& p) {
     float d1 = norm(proj0 - p0);
     d1 = std::min(d1, float(norm(proj0 - p1)));
     d1 = std::min(d1, float(norm(proj0 - p2)));
-    
+
     vec3 proj1;
     float d2;
     DISTANCE_HELPER(p0, p1);
