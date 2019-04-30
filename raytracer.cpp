@@ -4,9 +4,10 @@
 #include "StopWatch.h"
 #include "tetra.h"
 
-#include <string>
+#include "nlohmann/json.hpp"
+#include <iostream>
+#include <fstream>
 #include <vector>
-#include <array>
 
 #define TETRA_HELPER(a) d = norm(p - a); \
                         if (d < dist) { \
@@ -21,28 +22,30 @@ float tetra_de(const vec3 &_point);
 float mandelbulb_de(const vec3 &_point);
 float julia_de(const vec3 &_point);
 
+using json = nlohmann::json;
+
 int main(int argc, char **argv) {
     if (argc <= 1) return 1;
 
-    vec3 eye(-1.5, 0, 3), center(0, 0, 0), up(0, 1, 0);
-    double fovy = 45, width = 500, height = 500;
-    Camera camera(eye, center, up, fovy, width, height);
+    std::ifstream i(argv[1]);
+    json config;
+    i >> config;
+
+//    vec3 eye(-1.5, 0, 3), center(0, 0, 0), up(0, 1, 0);
+    Camera camera(config["camera"]);
 
     std::vector<Light> lights;
-//    vec3 pos1(0, 50, 0), pos2(50, 50, 50), pos3(-50, 50, 50), color(0.33);
-//    lights.push_back(Light(pos1, color));
-//    lights.push_back(Light(pos2, color));
-//    lights.push_back(Light(pos3, color));
-//    vec3 pos1(15, 15, 30), pos2(-30, 15, 30), color(0.5);
-//    lights.push_back(Light(pos1, color));
-//    lights.push_back(Light(pos2, color));
-    vec3 color(1);
-    lights.push_back(Light(eye, color));
+    for (const json &light : config["lights"])
+        lights.push_back(Light(light));
+    if (lights.empty()) lights.push_back(Light(camera.eye, vec3(1)));
 
-    int depth = 5;
-    vec3 ambience(0.2), background(0);
-    std::array<DE, 6> des = { sphere_de, spheres_3_de, spheres_many_de, tetra_de, mandelbulb_de, julia_de };
-    Scene s(camera, lights, des[argv[1][0] - '0'], depth, background, ambience, argc > 2);
+    std::vector<DE> des = { sphere_de, spheres_3_de, spheres_many_de, tetra_de, mandelbulb_de, julia_de };
+    int id = config["estimator"]["id"];
+    DE de = des[id];
+
+    Material material(config["material"]);
+
+    Scene s(camera, lights, de, config["scene"], material, argc > 2);
 
     StopWatch timer;
     timer.start();
@@ -52,11 +55,13 @@ int main(int argc, char **argv) {
     timer.stop();
     std::cout << timer << "\n";
 
-    img.write(std::string("test.tga"));
+    img.write(config["out"]);
 }
 
 float sphere_de(const vec3 &_point) {
-    return norm(_point) - 1.5;
+    float d0 = norm(_point) - 1.5;
+    float d1 = abs(dot(_point, vec3(0, 1, 0)) + 1.5);
+    return std::min(d0, d1);
 }
 
 float spheres_3_de(const vec3 &_point) {

@@ -1,7 +1,19 @@
 #include "Camera.h"
 
-Camera::Camera(const vec3& _eye, const vec3& _center, const vec3& _up, double _fovy, unsigned int _width, unsigned int _height) :
+#include <vector>
+
+Camera::Camera(const vec3 &_eye, const vec3 &_center, const vec3 &_up, double _fovy, unsigned int _width, unsigned int _height) :
     eye(_eye), center(_center), up(_up), fovy(_fovy), width(_width), height(_height) {
+    init();
+}
+
+Camera::Camera(const json &_j) : fovy(_j["fovy"]), width(_j["width"]), height(_j["height"]) {
+    std::vector<double> _eye = _j["eye"];
+    std::vector<double> _center = _j["center"];
+    std::vector<double> _up = _j["up"];
+    eye = vec3(_eye);
+    center = vec3(_center);
+    up = vec3(_up);
     init();
 }
 

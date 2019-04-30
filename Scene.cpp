@@ -1,9 +1,16 @@
 #include "Scene.h"
-
 #include "Ray.h"
 
-Scene::Scene(Camera &_camera, std::vector<Light> &_lights, DE _de, int _max_depth, vec3 &_background, vec3 &_ambience, bool _debug) :
-    camera(_camera), lights(_lights), de(_de), max_depth(_max_depth), background(_background), ambience(_ambience), debug(_debug) {}
+#include <vector>
+
+Scene::Scene(const Camera &_camera, const std::vector<Light> &_lights, DE _de, const json &_j, const Material &_material, bool _debug) :
+    camera(_camera), lights(_lights), de(_de), debug(_debug), max_depth(_j["max_depth"]), max_ray_steps(_j["max_ray_steps"]),
+    min_distance(_j["min_distance"]), max_distance(_j["max_distance"]), normal_distance(_j["normal_distance"]), material(_material) {
+    std::vector<double> _background = _j["background"];
+    std::vector<double> _ambience = _j["ambience"];
+    background = vec3(_background);
+    ambience = vec3(_ambience);
+}
 
 Image Scene::render() {
     Image img(camera.width, camera.height);
@@ -17,7 +24,7 @@ Image Scene::render() {
     return img;
 }
 
-vec3 Scene::trace(const Ray& _ray, int _depth) {
+vec3 Scene::trace(const Ray &_ray, int _depth) {
     if (_depth > max_depth) return vec3(0);
 
     float dist;
@@ -37,7 +44,7 @@ vec3 Scene::trace(const Ray& _ray, int _depth) {
     } else return background;
 }
 
-bool Scene::intersect(const Ray& _ray, float &_distance) {
+bool Scene::intersect(const Ray &_ray, float &_distance) {
     _distance = 0;
     int steps;
     for (steps = 0; steps < max_ray_steps; steps++) {
@@ -49,7 +56,7 @@ bool Scene::intersect(const Ray& _ray, float &_distance) {
     return steps != max_ray_steps;
 }
 
-vec3 Scene::estimate_normal(const vec3& point) {
+vec3 Scene::estimate_normal(const vec3 &point) {
     vec3 x(normal_distance, 0, 0), y(0, normal_distance, 0), z(0, 0, normal_distance);
     return normalize(vec3(
         de(point + x) - de(point - x),
@@ -57,7 +64,7 @@ vec3 Scene::estimate_normal(const vec3& point) {
         de(point + z) - de(point - z)));
 }
 
-vec3 Scene::lighting(const vec3& _point, const vec3& _normal, const vec3& _view) {
+vec3 Scene::lighting(const vec3 &_point, const vec3 &_normal, const vec3 &_view) {
     vec3 color = ambience * material.ambient;
 
     for (Light &light: lights) {

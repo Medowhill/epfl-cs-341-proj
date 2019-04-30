@@ -11,6 +11,12 @@ vec3::vec3(double _x, double _y, double _z) {
     data_[1] = _y;
     data_[2] = _z;
 }
+vec3::vec3(std::vector<double> _v) {
+    assert(_v.size() == 3);
+    data_[0] = _v[0];
+    data_[1] = _v[1];
+    data_[2] = _v[2];
+}
 
 double& vec3::operator[](unsigned int _i) {
     assert(_i < 3);

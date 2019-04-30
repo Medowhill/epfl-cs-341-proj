@@ -4,6 +4,10 @@
 #include "vec3.h"
 #include "Ray.h"
 
+#include "nlohmann/json.hpp"
+
+using json = nlohmann::json;
+
 class Camera {
 private:
     vec3 x_dir;
@@ -18,7 +22,8 @@ public:
     unsigned int width;
     unsigned int height;
 
-    Camera(const vec3& _eye, const vec3& _center, const vec3& _up, double _fovy, unsigned int _width, unsigned int _height);
+    Camera(const vec3 &_eye, const vec3 &_center, const vec3 &_up, double _fovy, unsigned int _width, unsigned int _height);
+    Camera(const json &_j);
     void init();
     Ray primary_ray(unsigned int _x, unsigned int _y) const;
 };

@@ -3,11 +3,17 @@
 
 #include "vec3.h"
 
+#include "nlohmann/json.hpp"
+
+using json = nlohmann::json;
+
 class Light {
 public:
     vec3 position;
     vec3 color;
-    Light(vec3 &_position, vec3 &_color);
+
+    Light(const vec3 &_position, const vec3 &_color);
+    Light(const json &_j);
 };
 
 #endif
