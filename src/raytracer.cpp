@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <unistd.h>
 
 #define TETRA_HELPER(a) d = norm(p - a); \
                         if (d < dist) { \
@@ -25,37 +26,72 @@ float julia_de(const vec3 &_point);
 using json = nlohmann::json;
 
 int main(int argc, char **argv) {
-    if (argc <= 1) return 1;
+    // Parse command line arguments
+    int c;
+    bool debug = false;
+    const char *input = NULL, *output = NULL;
+    while((c = getopt(argc, argv, "di:o:")) != -1) {
+        switch(c) {
+            case 'd':
+                debug = true;
+                break;
+            case 'i':
+                input = optarg;
+                break;
+            case 'o':
+                output = optarg;
+                break;
+            case '?':
+                break;
+        }
+    }
+    if (!input) {
+        std::cerr << "An input JSON file is not given.\n";
+        std::cerr << "Usage: build/raytracer -i [name].json\n";
+        std::cerr << "Usage: build/raytracer -i [name].json -o [name].png\n";
+        std::cerr << "Usage: build/raytracer -i [name].json -d\n";
+        std::cerr << std::flush;
+        return 1;
+    }
 
-    std::ifstream i(argv[1]);
+    // Read an input JSON file
+    std::ifstream i(input);
     json config;
     i >> config;
 
-//    vec3 eye(-1.5, 0, 3), center(0, 0, 0), up(0, 1, 0);
-    Camera camera(config["camera"]);
+    // Print information
+    std::string output_ = config["out"];
+    if (!output) output = output_.c_str();
+    std::cout << "Input file: " << input << std::endl;
+    std::cout << "Output file: " << output << std::endl;
+    std::cout << "Debug mode " << (debug ? "enabled" : "disabled") << std::endl;
 
+    // Create a camera
+    Camera camera(config["camera"]);
+//    vec3 eye(-1.5, 0, 3), center(0, 0, 0), up(0, 1, 0);
+
+    // Create lights
     std::vector<Light> lights;
     for (const json &light : config["lights"])
         lights.push_back(Light(light));
     if (lights.empty()) lights.push_back(Light(camera.eye, vec3(1)));
 
+    // Select a distance estimator
     std::vector<DE> des = { sphere_de, spheres_3_de, spheres_many_de, tetra_de, mandelbulb_de, julia_de };
     int id = config["estimator"]["id"];
     DE de = des[id];
 
+    // Create a material
     Material material(config["material"]);
 
+    // Render an image
     Scene s(camera, lights, de, config["scene"], material, argc > 2);
-
     StopWatch timer;
     timer.start();
-
     Image img = s.render();
-
     timer.stop();
-    std::cout << timer << "\n";
-
-    img.write(config["out"]);
+    img.write(output);
+    std::cout << "Time elapsed: " << timer << std::endl;
 }
 
 float sphere_de(const vec3 &_point) {

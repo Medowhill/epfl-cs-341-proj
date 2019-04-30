@@ -8,7 +8,7 @@ $ cd build
 $ cmake ..
 $ make
 $ cd ..
-$ build/raytracer examples/[name].json
+$ build/raytracer -i examples/[name].json
 
 # If you are using macOS, to open the rendered image:
 $ open out/[name].png
