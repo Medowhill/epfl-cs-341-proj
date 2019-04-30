@@ -18,6 +18,7 @@ float sphere_de(const vec3 &_point);
 float spheres_3_de(const vec3 &_point);
 float spheres_many_de(const vec3 &_point);
 float tetra_de(const vec3 &_point);
+float mandelbulb_de(const vec3 &_point);
 
 int main(int argc, char **argv) {
     if (argc <= 1) return 1;
@@ -34,7 +35,7 @@ int main(int argc, char **argv) {
 
     int depth = 5;
     vec3 ambience(0.2), background(0);
-    std::array<DE, 4> des = { sphere_de, spheres_3_de, spheres_many_de, tetra_de };
+    std::array<DE, 5> des = { sphere_de, spheres_3_de, spheres_many_de, tetra_de, mandelbulb_de };
     Scene s(camera, lights, des[argv[1][0] - '0'], depth, background, ambience, argc > 2);
 
     StopWatch timer;
@@ -85,4 +86,30 @@ float tetra_de(const vec3 &_point) {
     float d0 = tetra_distance(a1, a2, a3, a4, p) * pow(2, float(-iter));
     float d1 = abs(dot(_point, vec3(0, 1, 0)) + 2);
     return std::min(d0, d1);
+}
+
+float mandelbulb_de(const vec3 &_point) {
+    const int iter = 20;
+    const int power = 8;
+    const int bail_out = 10000;
+
+    vec3 p = _point;
+    float dr = 1, r;
+
+    for (int i = 0; i < iter; i++) {
+        r = norm(p);
+        if (r > bail_out) break;
+        if (r < 0.0001f) break;
+
+        float theta = acos(p[2] / r);
+        float phi = atan2(p[1], p[0]);
+        dr = power * pow(r, power - 1) * dr + 1;
+
+        theta *= power;
+        phi *= power;
+        float st = sin(theta), ct = cos(theta), sp = sin(phi), cp = cos(phi);
+        p = pow(r, power) * vec3(st * cp, st * sp, ct) + _point;
+    }
+
+    return 0.5 * log(r) * r / dr;
 }
