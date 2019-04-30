@@ -3,7 +3,7 @@
 
 #include "vec3.h"
 
-#include "nlohmann/json.hpp"
+#include "json.hpp"
 
 using json = nlohmann::json;
 

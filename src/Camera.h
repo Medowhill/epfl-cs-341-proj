@@ -4,7 +4,7 @@
 #include "vec3.h"
 #include "Ray.h"
 
-#include "nlohmann/json.hpp"
+#include "json.hpp"
 
 using json = nlohmann::json;
 

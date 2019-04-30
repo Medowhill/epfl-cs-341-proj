@@ -4,7 +4,7 @@
 #include "StopWatch.h"
 #include "tetra.h"
 
-#include "nlohmann/json.hpp"
+#include "json.hpp"
 #include <iostream>
 #include <fstream>
 #include <vector>

@@ -7,7 +7,7 @@
 #include "Light.h"
 #include "Material.h"
 
-#include "nlohmann/json.hpp"
+#include "json.hpp"
 
 typedef float (*DE)(const vec3&);
 using json = nlohmann::json;

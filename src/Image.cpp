@@ -1,6 +1,6 @@
 #include "Image.h"
-#include "lvandeve/lodepng.h"
 
+#include "lodepng.h"
 #include <iostream>
 #include <fstream>
 #include <assert.h>
