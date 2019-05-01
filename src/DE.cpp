@@ -64,21 +64,14 @@ void MandelbulbDE::set_params(const json &_j) {
 }
 
 float JuliaDE::operator()(const vec3 &_point) const {
-    vec3 p = _point;
+    quat q = quat(_point, k);
     float dr = 1, r;
 
     for (int i = 0; i < iter; i++) {
-        r = norm(p);
+        r = size(q);
         if (r > bail_out || r < min_distance) break;
-
-        float theta = acos(p[2] / r);
-        float phi = atan2(p[1], p[0]);
         dr = 2 * r * dr;
-
-        theta *= 2;
-        phi *= 2;
-        float st = sin(theta), ct = cos(theta), sp = sin(phi), cp = cos(phi);
-        p = r * r * vec3(st * cp, st * sp, ct) + d;
+        q *= q + d;
     }
 
     return 0.5 * log(r) * r / dr;
@@ -86,9 +79,9 @@ float JuliaDE::operator()(const vec3 &_point) const {
 
 void JuliaDE::set_params(const json &_j) {
     iter = _j["iter"];
-    power = _j["power"];
     bail_out = _j["bail_out"];
     min_distance = _j["min_distance"];
+    k = _j["k"];
     std::vector<double> _d = _j["d"];
-    d = vec3(_d);
+    d = quat(_d);
 }

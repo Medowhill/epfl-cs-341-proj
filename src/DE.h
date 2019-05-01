@@ -2,6 +2,7 @@
 #define DE_H
 
 #include "vec3.h"
+#include "quat.h"
 
 #include "json.hpp"
 #include <vector>
@@ -9,61 +10,61 @@
 using json = nlohmann::json;
 
 class DE {
-    public:
-        virtual ~DE() {}
-        virtual float operator()(const vec3 &_point) const { return 0; }
-        virtual void set_params(const json &_j) {}
+public:
+    virtual ~DE() {}
+    virtual float operator()(const vec3 &_point) const { return 0; }
+    virtual void set_params(const json &_j) {}
 };
 
 class SpheresDE : public DE {
-    private:
-        struct sphere {
-            vec3 center;
-            float radius;
-        };
-        std::vector<sphere> spheres;
-        float plane_z;
-        vec3 plane_normal;
-    public:
-        virtual float operator()(const vec3 &_point) const;
-        virtual void set_params(const json &_j);
+private:
+    struct sphere {
+        vec3 center;
+        float radius;
+    };
+    std::vector<sphere> spheres;
+    float plane_z;
+    vec3 plane_normal;
+public:
+    virtual float operator()(const vec3 &_point) const;
+    virtual void set_params(const json &_j);
 };
 
 class InfiniteSpheresDE : public DE {
-    private:
-        float radius;
-        float distance;
-    public:
-        virtual float operator()(const vec3 &_point) const;
-        virtual void set_params(const json &_j);
+private:
+    float radius;
+    float distance;
+public:
+    virtual float operator()(const vec3 &_point) const;
+    virtual void set_params(const json &_j);
 };
 
 class TetraDE : public DE {
-    private:
-        int iter;
-        vec3 a1, a2, a3, a4;
-    public:
-        virtual float operator()(const vec3 &_point) const;
-        virtual void set_params(const json &_j);
+private:
+    int iter;
+    vec3 a1, a2, a3, a4;
+public:
+    virtual float operator()(const vec3 &_point) const;
+    virtual void set_params(const json &_j);
 };
 
 class MandelbulbDE : public DE {
-    private:
-        int iter, power;
-        double bail_out, min_distance;
-    public:
-        virtual float operator()(const vec3 &_point) const;
-        virtual void set_params(const json &_j);
+private:
+    int iter, power;
+    double bail_out, min_distance;
+public:
+    virtual float operator()(const vec3 &_point) const;
+    virtual void set_params(const json &_j);
 };
 
 class JuliaDE : public DE {
-    private:
-        int iter, power;
-        double bail_out, min_distance;
-        vec3 d;
-    public:
-        virtual float operator()(const vec3 &_point) const;
-        virtual void set_params(const json &_j);
+private:
+    int iter;
+    double bail_out, min_distance, k;
+    quat d;
+public:
+    virtual float operator()(const vec3 &_point) const;
+    virtual void set_params(const json &_j);
 };
 
 inline DE *get_DE(int id) {

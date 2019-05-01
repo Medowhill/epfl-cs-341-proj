@@ -13,7 +13,7 @@
         "ambience": [0.2, 0.2, 0.2],
         "max_depth": 0,
         "max_ray_steps": 500,
-        "min_distance": 0.05,
+        "min_distance": 0.01,
         "max_distance": 20,
         "normal_distance": 0.0001
     },
@@ -26,11 +26,11 @@
     },
     "estimator": {
         "id": 4,
-        "iter": 20,
-        "power": 8,
-        "bail_out": 10000,
-        "min_distance": 0.05,
-        "d": [0.6, -0.8, 0.4]
+        "iter": 100,
+        "bail_out": 100000,
+        "min_distance": 0.01,
+        "d": [-1, 0.2, 0, 0],
+        "k": 0
     },
     "out": "out/julia.png"
 }
