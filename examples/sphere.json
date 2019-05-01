@@ -29,7 +29,12 @@
         "mirror": 0.2
     },
     "estimator": {
-        "id": 0
+        "id": 0,
+        "spheres": [
+            { "center": [0, 0, 0], "radius": 1.5 }
+        ],
+        "plane_z": -1.5,
+        "plane_normal": [0, 1, 0]
     },
     "out": "out/sphere.png"
 }

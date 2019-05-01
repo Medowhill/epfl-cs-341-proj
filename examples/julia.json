@@ -1,0 +1,36 @@
+{
+    "camera": {
+        "eye": [-2, 0, 4],
+        "center": [0, 0, 0],
+        "up": [0, 1, 0],
+        "fovy": 45,
+        "width": 500,
+        "height": 500
+    },
+    "lights": [],
+    "scene": {
+        "background": [0, 0, 0],
+        "ambience": [0.2, 0.2, 0.2],
+        "max_depth": 0,
+        "max_ray_steps": 500,
+        "min_distance": 0.05,
+        "max_distance": 20,
+        "normal_distance": 0.0001
+    },
+    "material": {
+        "ambient": [0.6, 0.6, 0.6],
+        "diffuse": [0.6, 0.6, 0.6],
+        "specular": [1, 1, 1],
+        "shininess": 50,
+        "mirror": 0
+    },
+    "estimator": {
+        "id": 4,
+        "iter": 20,
+        "power": 8,
+        "bail_out": 10000,
+        "min_distance": 0.05,
+        "d": [0.6, -0.8, 0.4]
+    },
+    "out": "out/julia.png"
+}

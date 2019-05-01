@@ -3,7 +3,7 @@
 
 #include <vector>
 
-Scene::Scene(const Camera &_camera, const std::vector<Light> &_lights, DE _de, const json &_j, const Material &_material, bool _debug) :
+Scene::Scene(const Camera &_camera, const std::vector<Light> &_lights, const DE &_de, const json &_j, const Material &_material, bool _debug) :
     camera(_camera), lights(_lights), de(_de), debug(_debug), max_depth(_j["max_depth"]), max_ray_steps(_j["max_ray_steps"]),
     min_distance(_j["min_distance"]), max_distance(_j["max_distance"]), normal_distance(_j["normal_distance"]), material(_material) {
     std::vector<double> _background = _j["background"];
@@ -70,7 +70,7 @@ vec3 Scene::lighting(const vec3 &_point, const vec3 &_normal, const vec3 &_view)
     for (Light &light: lights) {
       vec3 l = normalize(light.position - _point);
       vec3 r = mirror(l, _normal);
-      Ray shadow_ray(_point + 0.1 * l, l);
+      Ray shadow_ray(_point + min_distance * 10 * l, l);
 
       float t;
       if (!(intersect(shadow_ray,  t) && t < norm(_point - light.position))) {

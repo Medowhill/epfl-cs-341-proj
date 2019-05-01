@@ -1,4 +1,4 @@
-#include "vec3.h"
+#include "DE.h"
 
 #include <math.h>
 
@@ -8,6 +8,12 @@
                                     d1 = std::min(d1, d2); \
                                 }
 
+#define TETRA_HELPER(a) d = norm(p - a); \
+                        if (d < dist) { \
+                            c = a; \
+                            dist = d; \
+                        }
+
 /**
  * Calculate
  *
@@ -16,7 +22,7 @@
  *     ( [          ] )
  *
  */
-inline double determinant(const vec3& c0, const vec3& c1, const vec3& c2)
+static inline double determinant(const vec3& c0, const vec3& c1, const vec3& c2)
 {
     return
         c0[0] * c1[1] * c2[2] +
@@ -35,7 +41,7 @@ inline double determinant(const vec3& c0, const vec3& c1, const vec3& c2)
  * [          ] [ x2 ] = [   ]
  *
  */
-void cramer(const vec3& a0, const vec3& a1, const vec3& a2, const vec3& b,
+static void cramer(const vec3& a0, const vec3& a1, const vec3& a2, const vec3& b,
             double &x0, double &x1, double &x2)
 {
     const double detA = determinant(a0, a1, a2);
@@ -47,22 +53,22 @@ void cramer(const vec3& a0, const vec3& a1, const vec3& a2, const vec3& b,
     x2 = detA2 / detA;
 }
 
-vec3 triangle_normal(const vec3& p0, const vec3& p1, const vec3& p2) {
+static vec3 triangle_normal(const vec3& p0, const vec3& p1, const vec3& p2) {
    return normalize(cross(p1 - p0, p2 - p0));
 }
 
-vec3 proj_to_line(const vec3& p0, const vec3& p1, const vec3& p) {
+static vec3 proj_to_line(const vec3& p0, const vec3& p1, const vec3& p) {
     vec3 ab = normalize(p1 - p0);
     vec3 ap = p - p0;
     return p0 + dot(ab, ap) * ab;
 }
 
-bool in_line(const vec3& p0, const vec3& p1, const vec3& p) {
+static bool in_line(const vec3& p0, const vec3& p1, const vec3& p) {
     float l = norm(p0 - p1);
     return norm(p - p0) <= l && norm(p - p1) <= l;
 }
 
-float distance(const vec3& p0, const vec3& p1, const vec3& p2, const vec3& p) {
+static float distance(const vec3& p0, const vec3& p1, const vec3& p2, const vec3& p) {
     double b, c, t;
     vec3 n = triangle_normal(p0, p1, p2);
     cramer(p1 - p0, p2 - p0, n, p - p0, b, c, t);
@@ -86,7 +92,7 @@ float distance(const vec3& p0, const vec3& p1, const vec3& p2, const vec3& p) {
     return sqrt(d * d + d1 * d1);
 }
 
-float tetra_distance(const vec3& p0, const vec3& p1, const vec3& p2, const vec3& p3, const vec3& p) {
+static float tetra_distance(const vec3& p0, const vec3& p1, const vec3& p2, const vec3& p3, const vec3& p) {
     double d0 = distance(p0, p1, p2, p);
     double d1 = distance(p0, p1, p3, p);
     double d2 = distance(p0, p2, p3, p);
@@ -96,4 +102,30 @@ float tetra_distance(const vec3& p0, const vec3& p1, const vec3& p2, const vec3&
     int sign = (d0 < d && d1 < d && d2 < d && d3 < d) ? -1 : 1;
     return sign * std::min(d0, std::min(d1, std::min(d2, d3)));
     return std::min(d0, std::min(d1, std::min(d2, d3)));
+}
+
+float TetraDE::operator()(const vec3 &_point) const {
+    vec3 p = _point;
+
+    for (int i = 0; i < iter; i++) {
+        vec3 c = a1;
+        float dist = norm(p - a1), d;
+        TETRA_HELPER(a2);
+        TETRA_HELPER(a3);
+        TETRA_HELPER(a4);
+        p = 2 * p - c;
+    }
+
+    float d0 = tetra_distance(a1, a2, a3, a4, p) * pow(2, float(-iter));
+    float d1 = abs(dot(_point, vec3(0, 1, 0)) + 2);
+    return std::min(d0, d1);
+}
+
+void TetraDE::set_params(const json &_j) {
+    iter = _j["iter"];
+    double size = _j["size"];
+    a1 = vec3(size, size, size);
+    a2 = vec3(-size, -size, size);
+    a3 = vec3(size, -size, -size);
+    a4 = vec3(-size, size, -size);;
 }

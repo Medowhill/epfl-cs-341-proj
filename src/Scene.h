@@ -6,15 +6,15 @@
 #include "Camera.h"
 #include "Light.h"
 #include "Material.h"
+#include "DE.h"
 
 #include "json.hpp"
 
-typedef float (*DE)(const vec3&);
 using json = nlohmann::json;
 
 class Scene {
 public:
-    Scene(const Camera &_camera, const std::vector<Light> &_lights, DE _de, const json &_j, const Material &_material, bool _debug);
+    Scene(const Camera &_camera, const std::vector<Light> &_lights, const DE &_de, const json &_j, const Material &_material, bool _debug);
     Image render();
     vec3 trace(const Ray &_ray, int _depth);
     bool intersect(const Ray &_ray, float &_distance);
@@ -24,7 +24,7 @@ public:
 private:
     Camera camera;
     std::vector<Light> lights;
-    DE de;
+    const DE &de;
     vec3 background;
     vec3 ambience;
     Material material;
