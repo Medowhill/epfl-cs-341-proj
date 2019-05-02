@@ -36,5 +36,5 @@ bool Image::write(const std::string &_filename) const {
                 image_data[3 * (row * width + x) + c] = static_cast<unsigned char>(255.0 * (*this)(x, y)[c]);
         }
     }
-    return lodepng::encode(_filename, image_data, width, height, LCT_RGB);
+    return !lodepng::encode(_filename, image_data, width, height, LCT_RGB);
 }

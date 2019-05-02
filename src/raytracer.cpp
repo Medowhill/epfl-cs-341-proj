@@ -77,7 +77,16 @@ int main(int argc, char **argv) {
     timer.start();
     Image img = s.render();
     timer.stop();
-    img.write(output);
-    delete de;
     std::cout << "Time elapsed: " << timer << std::endl;
+    delete de;
+
+    // Write the image to a file
+    bool success = img.write(output);
+    if (success) {
+        std::cout << "Succeed to write the image to " << output << std::endl;
+        return 0;
+    } else {
+        std::cerr << "Fail to write the image to " << output << '\n' << std::flush;
+        return 1;
+    }
 }

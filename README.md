@@ -3,7 +3,7 @@
 ### Instructions
 * Install `make`, `cmake`, and `g++`.
 ```shell
-$ mkdir build
+$ mkdir build out
 $ cd build
 $ cmake ..
 $ make
