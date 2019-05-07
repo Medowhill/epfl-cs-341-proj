@@ -9,13 +9,16 @@ using json = nlohmann::json;
 
 class Material {
 public:
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-    double shininess;
-    double mirror;
+    const vec3 ambient;
+    const vec3 diffuse;
+    const vec3 specular;
+    const double shininess;
+    const double mirror;
+    const bool transparent;
+    const double ior;
 
-    Material(const vec3 &_ambient, const vec3 &_diffuse, const vec3 &_specular, double _shininess, double _mirror);
+    Material(const vec3 &_ambient, const vec3 &_diffuse, const vec3 &_specular,
+      double _shininess, double _mirror, bool _transparent, double _ior);
     Material(const json &_j);
 };
 

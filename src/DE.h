@@ -6,14 +6,14 @@
 
 #include "json.hpp"
 #include <vector>
+#include <stdexcept>
 
 using json = nlohmann::json;
 
 class DE {
 public:
     virtual ~DE() {}
-    virtual float operator()(const vec3 &_point) const { return 0; }
-    virtual void set_params(const json &_j) {}
+    virtual float operator()(const vec3 &_point) const { throw std::logic_error("Unimplemented"); }
 };
 
 class SpheresDE : public DE {
@@ -23,11 +23,11 @@ private:
         float radius;
     };
     std::vector<sphere> spheres;
-    float plane_z;
-    vec3 plane_normal;
+    const float plane_z;
+    const vec3 plane_normal;
 public:
+    SpheresDE(const json &_j);
     virtual float operator()(const vec3 &_point) const;
-    virtual void set_params(const json &_j);
 };
 
 class InfiniteSpheresDE : public DE {
@@ -35,17 +35,18 @@ private:
     float radius;
     float distance;
 public:
+    InfiniteSpheresDE(const json &_j);
     virtual float operator()(const vec3 &_point) const;
-    virtual void set_params(const json &_j);
 };
 
 class TetraDE : public DE {
 private:
     int iter;
+    float plane_z;
     vec3 a1, a2, a3, a4;
 public:
+    TetraDE(const json &_j);
     virtual float operator()(const vec3 &_point) const;
-    virtual void set_params(const json &_j);
 };
 
 class MandelbulbDE : public DE {
@@ -53,8 +54,8 @@ private:
     int iter, power;
     double bail_out, min_distance;
 public:
+    MandelbulbDE(const json &_j);
     virtual float operator()(const vec3 &_point) const;
-    virtual void set_params(const json &_j);
 };
 
 class JuliaDE : public DE {
@@ -63,20 +64,19 @@ private:
     double bail_out, min_distance, k;
     quat d;
 public:
+    JuliaDE(const json &_j);
     virtual float operator()(const vec3 &_point) const;
-    virtual void set_params(const json &_j);
 };
 
-inline DE *get_DE(int id) {
+inline const DE &create_DE(const json &_j) {
+    int id = _j["id"];
     switch(id) {
-        case 0: return new SpheresDE();
-        case 1: return new InfiniteSpheresDE();
-        case 2: return new TetraDE();
-        case 3: return new MandelbulbDE();
-        case 4: return new JuliaDE();
-        default:
-            std::cerr << "Unknown DE id\n" << std::flush;
-            exit(1);
+        case 0: return *(new SpheresDE(_j));
+        case 1: return *(new InfiniteSpheresDE(_j));
+        case 2: return *(new TetraDE(_j));
+        case 3: return *(new MandelbulbDE(_j));
+        case 4: return *(new JuliaDE(_j));
+        default: throw std::logic_error("Unknwon DE ID");
     }
 }
 

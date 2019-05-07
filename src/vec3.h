@@ -1,10 +1,13 @@
 #ifndef VEC3_H
 #define VEC3_H
 
+#include "json.hpp"
 #include <iostream>
 #include <assert.h>
 #include <math.h>
 #include <vector>
+
+using json = nlohmann::json;
 
 class vec3 {
 private:
@@ -14,7 +17,7 @@ public:
     vec3();
     vec3(double _x);
     vec3(double _x, double _y, double _z);
-    vec3(std::vector<double> _v);
+    vec3(const json &_j);
 
     double& operator[](unsigned int _i);
     const double operator[](unsigned int _i) const;

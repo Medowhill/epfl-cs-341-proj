@@ -1,6 +1,7 @@
 #include "Scene.h"
 #include "Image.h"
 #include "Light.h"
+#include "TexMap.h"
 #include "StopWatch.h"
 #include "DE.h"
 
@@ -55,7 +56,6 @@ int main(int argc, char **argv) {
 
     // Create a camera
     Camera camera(config["camera"]);
-//    vec3 eye(-1.5, 0, 3), center(0, 0, 0), up(0, 1, 0);
 
     // Create lights
     std::vector<Light> lights;
@@ -64,21 +64,19 @@ int main(int argc, char **argv) {
     if (lights.empty()) lights.push_back(Light(camera.eye, vec3(1)));
 
     // Select a distance estimator
-    const json &estimator_config = config["estimator"];
-    DE *de = get_DE(estimator_config["id"]);
-    de->set_params(estimator_config);
+    const DE &de = create_DE(config["estimator"]);
 
-    // Create a material
-    Material material(config["material"]);
+    // Create a texture map
+    TexMap tex_map(config["textures"]);
 
     // Render an image
-    Scene s(camera, lights, *de, config["scene"], material, debug);
+    Scene s(camera, lights, de, tex_map, config["scene"], debug);
     StopWatch timer;
     timer.start();
     Image img = s.render();
     timer.stop();
     std::cout << "Time elapsed: " << timer << std::endl;
-    delete de;
+    delete &de;
 
     // Write the image to a file
     bool success = img.write(output);

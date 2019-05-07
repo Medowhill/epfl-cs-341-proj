@@ -3,7 +3,10 @@
 
 #include "vec3.h"
 
+#include "json.hpp"
 #include <vector>
+
+using json = nlohmann::json;
 
 class quat {
 public:
@@ -12,7 +15,7 @@ public:
     quat();
     quat(double _r, double _i, double _j, double _k);
     quat(const vec3 &v, double _k);
-    quat(const std::vector<double> &v);
+    quat(const json &_j);
 
     quat& operator+=(const quat &q);
     quat& operator-=(const quat &q);

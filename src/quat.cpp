@@ -5,7 +5,8 @@
 quat::quat() : r(0), i(0), j(0), k(0) {}
 quat::quat(double _r, double _i, double _j, double _k) : r(_r), i(_i), j(_j), k(_k) {}
 quat::quat(const vec3 &v, double _k) : r(v[0]), i(v[1]), j(v[2]), k(_k) {}
-quat::quat(const std::vector<double> &v) {
+quat::quat(const json &_j) {
+    std::vector<double> v = _j;
     assert(v.size() == 4);
     r = v[0];
     i = v[1];

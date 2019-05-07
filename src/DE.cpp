@@ -1,5 +1,16 @@
 #include "DE.h"
 
+SpheresDE::SpheresDE(const json &_j) : plane_z(_j["plane_z"]), plane_normal(_j["plane_normal"]) {
+    std::vector<json> _spheres = _j["spheres"];
+    for (const json &j : _spheres) {
+        sphere s;
+        s.radius = j["radius"];
+        std::vector<double> _c = j["center"];
+        s.center = vec3(_c);
+        spheres.push_back(s);
+    }
+}
+
 float SpheresDE::operator()(const vec3 &_point) const {
     float d = abs(dot(_point, plane_normal) - plane_z);
     for (const sphere &s : spheres) {
@@ -9,19 +20,7 @@ float SpheresDE::operator()(const vec3 &_point) const {
     return d;
 }
 
-void SpheresDE::set_params(const json &_j) {
-    std::vector<json> _spheres = _j["spheres"];
-    for (const json &j : _spheres) {
-        sphere s;
-        s.radius = j["radius"];
-        std::vector<double> _c = j["center"];
-        s.center = vec3(_c);
-        spheres.push_back(s);
-    }
-    plane_z = _j["plane_z"];
-    std::vector<double> _n = _j["plane_normal"];
-    plane_normal = vec3(_n);
-}
+InfiniteSpheresDE::InfiniteSpheresDE(const json &_j) : radius(_j["radius"]), distance(_j["distance"]) {}
 
 float InfiniteSpheresDE::operator()(const vec3 &_point) const {
     vec3 np(round(_point[0] / distance) * distance, 0, round(_point[2] / distance) * distance);
@@ -30,10 +29,8 @@ float InfiniteSpheresDE::operator()(const vec3 &_point) const {
     return std::min(d0, d1);
 }
 
-void InfiniteSpheresDE::set_params(const json &_j) {
-    radius = _j["radius"];
-    distance = _j["distance"];
-}
+MandelbulbDE::MandelbulbDE(const json &_j) :
+    iter(_j["iter"]), power(_j["power"]), bail_out(_j["bail_out"]), min_distance(_j["min_distance"]) {}
 
 float MandelbulbDE::operator()(const vec3 &_point) const {
     vec3 p = _point;
@@ -56,12 +53,8 @@ float MandelbulbDE::operator()(const vec3 &_point) const {
     return 0.5 * log(r) * r / dr;
 }
 
-void MandelbulbDE::set_params(const json &_j) {
-    iter = _j["iter"];
-    power = _j["power"];
-    bail_out = _j["bail_out"];
-    min_distance = _j["min_distance"];
-}
+JuliaDE::JuliaDE(const json &_j) :
+    iter(_j["iter"]), bail_out(_j["bail_out"]), min_distance(_j["min_distance"]), k(_j["k"]), d(_j["d"]) {}
 
 float JuliaDE::operator()(const vec3 &_point) const {
     quat q = quat(_point, k);
@@ -75,13 +68,4 @@ float JuliaDE::operator()(const vec3 &_point) const {
     }
 
     return 0.5 * log(r) * r / dr;
-}
-
-void JuliaDE::set_params(const json &_j) {
-    iter = _j["iter"];
-    bail_out = _j["bail_out"];
-    min_distance = _j["min_distance"];
-    k = _j["k"];
-    std::vector<double> _d = _j["d"];
-    d = quat(_d);
 }

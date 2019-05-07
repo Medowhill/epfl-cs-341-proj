@@ -11,7 +11,8 @@ vec3::vec3(double _x, double _y, double _z) {
     data_[1] = _y;
     data_[2] = _z;
 }
-vec3::vec3(std::vector<double> _v) {
+vec3::vec3(const json &_j) {
+    std::vector<double> _v = _j;
     assert(_v.size() == 3);
     data_[0] = _v[0];
     data_[1] = _v[1];
