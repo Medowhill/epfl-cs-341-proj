@@ -1,5 +1,7 @@
 #include "DE.h"
 
+#include <cmath>
+
 SpheresDE::SpheresDE(const json &_j) : plane_z(_j["plane_z"]), plane_normal(_j["plane_normal"]) {
     std::vector<json> _spheres = _j["spheres"];
     for (const json &j : _spheres) {
@@ -12,7 +14,7 @@ SpheresDE::SpheresDE(const json &_j) : plane_z(_j["plane_z"]), plane_normal(_j["
 }
 
 float SpheresDE::operator()(const vec3 &_point) const {
-    float d = abs(dot(_point, plane_normal) - plane_z);
+    float d = std::abs(dot(_point, plane_normal) - plane_z);
     for (const sphere &s : spheres) {
         float d1 = norm(_point - s.center) - s.radius;
         d = std::min(d, d1);
@@ -25,7 +27,7 @@ InfiniteSpheresDE::InfiniteSpheresDE(const json &_j) : radius(_j["radius"]), dis
 float InfiniteSpheresDE::operator()(const vec3 &_point) const {
     vec3 np(round(_point[0] / distance) * distance, 0, round(_point[2] / distance) * distance);
     float d0 = norm(np - _point) - radius;
-    float d1 = abs(dot(_point, vec3(0, 1, 0)) + radius);
+    float d1 = std::abs(dot(_point, vec3(0, 1, 0)) + radius);
     return std::min(d0, d1);
 }
 

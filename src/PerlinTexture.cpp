@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <math.h>
+#include <cmath>
 
 static int hash_poly(int x) { return ((x * 34) + 1) * x % 289; }
 static int hash_func(const vec3 &v) { return hash_poly(hash_poly(hash_poly(int(v[0])) + int(v[1])) + int(v[2])); }
@@ -84,7 +85,7 @@ float PerlinTexture::fbm(const vec3 &point) const {
 float PerlinTexture::turbulence(const vec3 &point) const {
     float res = 0, freq = 1, ampl = 1;
     for (int i = 0; i < num_octaves; i++, freq *= freq_multiplier, ampl *= ampl_multiplier)
-        res += ampl * abs(noise(point * freq));
+        res += ampl * std::abs(noise(point * freq));
     return res;
 }
 

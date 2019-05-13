@@ -1,6 +1,7 @@
 #include "DE.h"
 
 #include <math.h>
+#include <cmath>
 
 #define DISTANCE_HELPER(p0, p1) proj1 = proj_to_line(p0, p1, proj0); \
                                 if (in_line(p0, p1, proj1)) { \
@@ -73,7 +74,7 @@ static float distance(const vec3& p0, const vec3& p1, const vec3& p2, const vec3
     vec3 n = triangle_normal(p0, p1, p2);
     cramer(p1 - p0, p2 - p0, n, p - p0, b, c, t);
 
-    float d = abs(dot(p, n) - dot(p0, n));
+    float d = std::abs(dot(p, n) - dot(p0, n));
     float a = 1 - b - c;
     if (a >= 0 && b >= 0 && c >= 0) // projected into the triangle
         return d;
@@ -125,6 +126,6 @@ float TetraDE::operator()(const vec3 &_point) const {
     }
 
     float d0 = tetra_distance(a1, a2, a3, a4, p) * pow(2, float(-iter));
-    float d1 = abs(dot(_point, vec3(0, 1, 0)) - plane_z);
+    float d1 = std::abs(dot(_point, vec3(0, 1, 0)) - plane_z);
     return std::min(d0, d1);
 }
