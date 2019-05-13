@@ -1,11 +1,14 @@
 {
     "camera": {
-        "eye": [2.8, 2.5, 2], 
+        "control_polygon": [
+            [2.8, 2.5, 2]
+        ],
         "center": [0, 0, 0],
         "up": [0, 1, 0],
         "fovy": 45,
         "width": 500,
-        "height": 500
+        "height": 500,
+        "duration": 0
     },
     "lights": [
         { "position": [5, 5, 0], "color": [0.55, 0.55, 0.55] },
@@ -58,5 +61,5 @@
         "iter": 4,
         "plane_z": -2
     },
-    "out": "out/tetra.png"
+    "out": "out/tetra"
 }

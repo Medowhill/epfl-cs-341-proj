@@ -3,7 +3,7 @@
 
 #include <vector>
 
-Scene::Scene(const Camera &_camera, const std::vector<Light> &_lights, const DE &_de, const TexMap &_tex_map, const json &_j, bool _debug) :
+Scene::Scene(Camera &_camera, const std::vector<Light> &_lights, const DE &_de, const TexMap &_tex_map, const json &_j, bool _debug) :
     camera(_camera), lights(_lights), de(_de), tex_map(_tex_map), debug(_debug),
     background(_j["background"]), ambience(_j["ambience"]), max_depth(_j["max_depth"]), max_ray_steps(_j["max_ray_steps"]),
     min_distance(_j["min_distance"]), max_distance(_j["max_distance"]), normal_distance(_j["normal_distance"]), shadow_margin(_j["shadow_margin"]) {}
@@ -31,7 +31,7 @@ vec3 Scene::trace(const Ray &_ray, int _depth) const {
         Material material = tex_map.get_material(point);
 
         vec3 normal = estimate_normal(point);
-        vec3 color = lighting(point, normal, normalize(camera.eye - point), material);
+        vec3 color = lighting(point, normal, normalize(camera.eye_position() - point), material);
 
         if (material.mirror != 0) {
             vec3 direction = reflect(_ray.direction, normal);

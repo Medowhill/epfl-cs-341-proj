@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     std::string output_ = config["out"];
     if (!output) output = output_.c_str();
     std::cout << "Input file: " << input << std::endl;
-    std::cout << "Output file: " << output << std::endl;
+    std::cout << "Output files: " << output << "[n].png" << std::endl;
     std::cout << "Debug mode " << (debug ? "enabled" : "disabled") << std::endl;
 
     // Create a camera
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     std::vector<Light> lights;
     for (const json &light : config["lights"])
         lights.push_back(Light(light));
-    if (lights.empty()) lights.push_back(Light(camera.eye, vec3(1)));
+    if (lights.empty()) lights.push_back(Light(camera.eye_position(), vec3(1)));
 
     // Select a distance estimator
     const DE &de = create_DE(config["estimator"]);
@@ -71,20 +71,25 @@ int main(int argc, char **argv) {
 
     // Render an image
     Scene s(camera, lights, de, tex_map, config["scene"], debug);
-    StopWatch timer;
-    timer.start();
-    Image img = s.render();
-    timer.stop();
-    std::cout << "Time elapsed: " << timer << std::endl;
+    std::vector<Image> images;
+    do {
+        StopWatch timer;
+        timer.start();
+        images.push_back(s.render());
+        timer.stop();
+        std::cout << "Time elapsed: " << timer << std::endl;
+    } while (camera.move());
     delete &de;
 
     // Write the image to a file
-    bool success = img.write(output);
-    if (success) {
-        std::cout << "Succeed to write the image to " << output << std::endl;
-        return 0;
-    } else {
-        std::cerr << "Fail to write the image to " << output << '\n' << std::flush;
-        return 1;
+    int n = 0;
+    for (const Image &image : images) {
+        std::string name = output + std::to_string(n++) + ".png";
+        if (image.write(name))
+            std::cout << "Succeed to write the image to " << name << std::endl;
+        else {
+            std::cerr << "Fail to write the image to " << name << '\n' << std::flush;
+            exit(1);
+        }
     }
 }

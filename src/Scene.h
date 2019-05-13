@@ -15,7 +15,7 @@ using json = nlohmann::json;
 
 class Scene {
 private:
-    const Camera &camera;
+    Camera &camera;
     const std::vector<Light> &lights;
     const DE &de;
     const TexMap &tex_map;
@@ -35,7 +35,7 @@ private:
     vec3 lighting(const vec3 &_point, const vec3 &_normal, const vec3 &_view, const Material &_material) const;
 
 public:
-    Scene(const Camera &_camera, const std::vector<Light> &_lights, const DE &_de, const TexMap &_tex_map, const json &_j, bool _debug);
+    Scene(Camera &_camera, const std::vector<Light> &_lights, const DE &_de, const TexMap &_tex_map, const json &_j, bool _debug);
     Image render() const;
 };
 
