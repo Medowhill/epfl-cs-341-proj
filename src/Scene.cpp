@@ -11,12 +11,19 @@ Scene::Scene(Camera &_camera, const std::vector<Light> &_lights, const DE &_de, 
 Image Scene::render() const {
     Image img(camera.width, camera.height);
 
-    for (int x = 0; x < int(camera.width); x++) {
+    auto raytrace_column = [&img, this](int x) {
         for (int y = 0; y < int(camera.height); y++) {
             Ray ray = camera.primary_ray(x, y);
             img(x,y) = min(trace(ray, 0), vec3(1));
         }
-    }
+    };
+
+#if defined(_OPENMP)
+#pragma omp parallel for
+#endif
+    for (int x = 0; x < int(camera.width); x++)
+        raytrace_column(x);
+
     return img;
 }
 
