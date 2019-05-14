@@ -57,3 +57,7 @@ Ray Camera::primary_ray(unsigned int _x, unsigned int _y) const {
 const vec3 &Camera::eye_position() const {
     return eye;
 }
+
+const unsigned long Camera::current_time() const {
+    return time;
+}

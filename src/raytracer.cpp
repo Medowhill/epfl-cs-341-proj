@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
         timer.start();
         images.push_back(s.render());
         timer.stop();
-        std::cout << "Time elapsed: " << timer << std::endl;
+        std::cout << '(' << camera.current_time() << '/' << camera.duration << ") Time elapsed: " << timer << std::endl;
     } while (camera.move());
     delete &de;
 

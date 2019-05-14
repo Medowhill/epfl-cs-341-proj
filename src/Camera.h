@@ -34,6 +34,7 @@ public:
     bool move();
     Ray primary_ray(unsigned int _x, unsigned int _y) const;
     const vec3 &eye_position() const;
+    const unsigned long current_time() const;
 };
 
 #endif
