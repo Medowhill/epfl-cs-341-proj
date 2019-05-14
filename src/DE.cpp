@@ -60,14 +60,13 @@ JuliaDE::JuliaDE(const json &_j) :
 
 float JuliaDE::operator()(const vec3 &_point) const {
     quat q = quat(_point, k);
-    float dr = 1, r;
-
+    quat dq = quat(1, 0, 0, 0);
+    double r;
     for (int i = 0; i < iter; i++) {
+        dq = 2 * q * dq;
+        q = q * q + d;
         r = size(q);
         if (r > bail_out || r < min_distance) break;
-        dr = 2 * r * dr;
-        q *= q + d;
     }
-
-    return 0.5 * log(r) * r / dr;
+    return 0.5 * log(r) * r / size(dq);
 }

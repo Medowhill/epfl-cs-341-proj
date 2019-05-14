@@ -9,7 +9,7 @@ Camera::Camera(const std::vector<vec3> &_control_polygon, const vec3 &_center, c
 }
 
 Camera::Camera(const json &_j) :
-    center(_j["center"]), up(_j["up"]), fovy(_j["fovy"]), width(_j["width"]), height(_j["height"]), duration(_j["duration"]) {
+    center(_j["center"]), up(_j["up"]), fovy(_j["fovy"]), width(_j["width"]), height(_j["height"]), duration(_j["duration"]), time(0) {
     std::vector<json> _control_polygon = _j["control_polygon"];
     for (const json &j : _control_polygon)
         control_polygon.push_back(vec3(j));
