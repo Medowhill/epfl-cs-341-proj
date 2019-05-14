@@ -1,0 +1,55 @@
+{
+    "camera": {
+        "control_polygon": [
+            [-2, 0, 4],
+            [8, 0, 4],
+            [4, 0, -8],
+            [-4, 0, -2],
+            [-2, 0, 4]
+        ],
+        "center": [0, 0, 0],
+        "up": [0, 1, 0],
+        "fovy": 45,
+        "width": 500,
+        "height": 500,
+        "duration": 48
+    },
+    "lights": [
+        { "position": [-5, 0, 10], "color": [0.5, 0.5, 0.5] },
+        { "position": [5, 0, -10], "color": [0.5, 0.5, 0.5] }
+    ],
+    "scene": {
+        "background": [0, 0, 0],
+        "ambience": [0.2, 0.2, 0.2],
+        "max_depth": 0,
+        "max_ray_steps": 500,
+        "min_distance": 0.01,
+        "max_distance": 30,
+        "normal_distance": 0.0001,
+        "shadow_margin": 0.1
+    },
+    "textures": {
+        "default": {
+            "id": 0,
+            "material": {
+                "ambient": [0.6, 0.6, 0.6],
+                "diffuse": [0.6, 0.6, 0.6],
+                "specular": [1, 1, 1],
+                "shininess": 50,
+                "mirror": 0,
+                "transparent": false,
+                "ior": 1.5
+            }
+        },
+        "constrained": []
+    },
+    "estimator": {
+        "id": 4,
+        "iter": 100,
+        "bail_out": 100000,
+        "min_distance": 0.01,
+        "d": [-1, 0.2, 0, 0],
+        "k": 0
+    },
+    "out": "out/julia_video"
+}
