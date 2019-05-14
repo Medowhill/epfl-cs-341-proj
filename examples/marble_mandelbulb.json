@@ -16,6 +16,7 @@
         "ambience": [0.2, 0.2, 0.2],
         "max_depth": 0,
         "max_ray_steps": 500,
+        "occlusion_steps": 100,
         "min_distance": 0.01,
         "max_distance": 20,
         "normal_distance": 0.0001,

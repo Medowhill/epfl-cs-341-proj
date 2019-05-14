@@ -1,14 +1,17 @@
 #include "Scene.h"
 #include "Ray.h"
 
+#include <cmath>
+#include <math.h>
 #include <vector>
 
-Scene::Scene(Camera &_camera, const std::vector<Light> &_lights, const DE &_de, const TexMap &_tex_map, const json &_j, bool _debug, bool _shadow) :
-    camera(_camera), lights(_lights), de(_de), tex_map(_tex_map), debug(_debug), shadow(_shadow),
-    background(_j["background"]), ambience(_j["ambience"]), max_depth(_j["max_depth"]), max_ray_steps(_j["max_ray_steps"]),
+Scene::Scene(Camera &_camera, const std::vector<Light> &_lights, const DE &_de, const TexMap &_tex_map,
+    const json &_j, bool _debug, bool _shadow, bool _ambient_occlusion) :
+    camera(_camera), lights(_lights), de(_de), tex_map(_tex_map), debug(_debug), shadow(_shadow), ambient_occlusion(_ambient_occlusion), distribution(0.0, 1.0),
+    background(_j["background"]), ambience(_j["ambience"]), max_depth(_j["max_depth"]), max_ray_steps(_j["max_ray_steps"]), occlusion_steps(_j["occlusion_steps"]),
     min_distance(_j["min_distance"]), max_distance(_j["max_distance"]), normal_distance(_j["normal_distance"]), shadow_margin(_j["shadow_margin"]) {}
 
-Image Scene::render() const {
+Image Scene::render() {
     Image img(camera.width, camera.height);
 
     auto raytrace_column = [&img, this](int x) {
@@ -27,7 +30,7 @@ Image Scene::render() const {
     return img;
 }
 
-vec3 Scene::trace(const Ray &_ray, int _depth) const {
+vec3 Scene::trace(const Ray &_ray, int _depth) {
     if (_depth > max_depth) return vec3(0);
 
     float dist;
@@ -69,8 +72,38 @@ vec3 Scene::estimate_normal(const vec3 &point) const {
         de(point + z) - de(point - z)));
 }
 
-vec3 Scene::lighting(const vec3 &_point, const vec3 &_normal, const vec3 &_view, const Material &_material) const {
-    vec3 color = ambience * _material.ambient;
+double Scene::occlusion(const vec3 &_point, const vec3 &_normal) {
+    vec3 z = _normal;
+    int max_i = 0;
+    double max_v = std::abs(z[0]);
+    for (int i = 1; i < 3; i++) {
+        double v = std::abs(z[i]);
+        if (max_v < v) {
+            max_v = v;
+            max_i = i;
+        }
+    }
+    vec3 x(1);
+    x[max_i] = -(z[(max_i + 1) % 3] + z[(max_i + 2) % 3]) / z[max_i];
+    x = normalize(x);
+    vec3 y = normalize(cross(x, z));
+
+    int n = 0;
+    float t;
+    for (int i = 0; i < occlusion_steps; i++) {
+        double phi = distribution(generator) * M_PI * 2.0;
+        double theta = distribution(generator) * M_PI * 0.5;
+        vec3 dir = x * sin(theta) * cos(phi) + y * sin(theta) * sin(phi) + z * cos(theta);
+        Ray ray(_point + shadow_margin * dir, dir);
+        if (intersect(ray, t)) n++;
+    }
+    return double(n) / occlusion_steps;
+}
+
+vec3 Scene::lighting(const vec3 &_point, const vec3 &_normal, const vec3 &_view, const Material &_material) {
+    vec3 color =
+         (ambient_occlusion ? (1.0 - occlusion(_point, _normal)) : 1.0) *
+         ambience * _material.ambient;
 
     for (const Light &light: lights) {
       vec3 l = normalize(light.position - _point);
