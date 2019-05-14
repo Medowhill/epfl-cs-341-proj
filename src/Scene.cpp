@@ -3,8 +3,8 @@
 
 #include <vector>
 
-Scene::Scene(Camera &_camera, const std::vector<Light> &_lights, const DE &_de, const TexMap &_tex_map, const json &_j, bool _debug) :
-    camera(_camera), lights(_lights), de(_de), tex_map(_tex_map), debug(_debug),
+Scene::Scene(Camera &_camera, const std::vector<Light> &_lights, const DE &_de, const TexMap &_tex_map, const json &_j, bool _debug, bool _shadow) :
+    camera(_camera), lights(_lights), de(_de), tex_map(_tex_map), debug(_debug), shadow(_shadow),
     background(_j["background"]), ambience(_j["ambience"]), max_depth(_j["max_depth"]), max_ray_steps(_j["max_ray_steps"]),
     min_distance(_j["min_distance"]), max_distance(_j["max_distance"]), normal_distance(_j["normal_distance"]), shadow_margin(_j["shadow_margin"]) {}
 
@@ -78,7 +78,7 @@ vec3 Scene::lighting(const vec3 &_point, const vec3 &_normal, const vec3 &_view,
       Ray shadow_ray(_point + shadow_margin * l, l);
 
       float t;
-      if (!(intersect(shadow_ray, t) && t < norm(_point - light.position))) {
+      if (!shadow || !(intersect(shadow_ray, t) && t < norm(_point - light.position))) {
           double dd = dot(_normal, l);
           if (dd > 0) color += light.color * _material.diffuse * dd;
           double ds = dot(_view, r);

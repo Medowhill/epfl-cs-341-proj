@@ -16,12 +16,15 @@ using json = nlohmann::json;
 int main(int argc, char **argv) {
     // Parse command line arguments
     int c;
-    bool debug = false;
+    bool debug = false, shadow = false;
     const char *input = NULL, *output = NULL;
-    while((c = getopt(argc, argv, "di:o:")) != -1) {
+    while((c = getopt(argc, argv, "dsi:o:")) != -1) {
         switch(c) {
             case 'd':
                 debug = true;
+                break;
+            case 's':
+                shadow = true;
                 break;
             case 'i':
                 input = optarg;
@@ -36,8 +39,9 @@ int main(int argc, char **argv) {
     if (!input) {
         std::cerr << "An input JSON file is not given.\n";
         std::cerr << "Usage: build/raytracer -i [name].json\n";
-        std::cerr << "Usage: build/raytracer -i [name].json -o [name].png\n";
-        std::cerr << "Usage: build/raytracer -i [name].json -d\n";
+        std::cerr << "       build/raytracer -i [name].json -o [name]\n";
+        std::cerr << "       build/raytracer -i [name].json -d\n";
+        std::cerr << "       build/raytracer -i [name].json -s\n";
         std::cerr << std::flush;
         return 1;
     }
@@ -70,7 +74,7 @@ int main(int argc, char **argv) {
     TexMap tex_map(config["textures"]);
 
     // Render an image
-    Scene s(camera, lights, de, tex_map, config["scene"], debug);
+    Scene s(camera, lights, de, tex_map, config["scene"], debug, shadow);
     std::vector<Image> images;
     do {
         StopWatch timer;
