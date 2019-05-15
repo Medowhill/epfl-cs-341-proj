@@ -6,10 +6,11 @@
 #include <vector>
 
 Scene::Scene(Camera &_camera, const std::vector<Light> &_lights, const DE &_de, const TexMap &_tex_map,
-    const json &_j, bool _debug, bool _shadow, bool _ambient_occlusion) :
-    camera(_camera), lights(_lights), de(_de), tex_map(_tex_map), debug(_debug), shadow(_shadow), ambient_occlusion(_ambient_occlusion), distribution(0.0, 1.0),
-    background(_j["background"]), ambience(_j["ambience"]), max_depth(_j["max_depth"]), max_ray_steps(_j["max_ray_steps"]), occlusion_steps(_j["occlusion_steps"]),
-    min_distance(_j["min_distance"]), max_distance(_j["max_distance"]), normal_distance(_j["normal_distance"]), shadow_margin(_j["shadow_margin"]) {}
+    const json &_j, bool _debug, shadow_type _shadow, bool _ambient_occlusion) :
+    camera(_camera), lights(_lights), de(_de), tex_map(_tex_map), debug(_debug), shadow(_shadow), ambient_occlusion(_ambient_occlusion),
+    distribution(0.0, 1.0), background(_j["background"]), ambience(_j["ambience"]), max_depth(_j["max_depth"]), max_ray_steps(_j["max_ray_steps"]),
+    monte_carlo_iter(_j["monte_carlo_iter"]), min_distance(_j["min_distance"]), max_distance(_j["max_distance"]), normal_distance(_j["normal_distance"]),
+    shadow_margin(_j["shadow_margin"]), light_radius(_j["light_radius"]) {}
 
 Image Scene::render() {
     Image img(camera.width, camera.height);
@@ -72,8 +73,7 @@ vec3 Scene::estimate_normal(const vec3 &point) const {
         de(point + z) - de(point - z)));
 }
 
-double Scene::occlusion(const vec3 &_point, const vec3 &_normal) {
-    vec3 z = _normal;
+void Scene::orthonormal_vectors(const vec3 &z, vec3 &x, vec3 &y) const {
     int max_i = 0;
     double max_v = std::abs(z[0]);
     for (int i = 1; i < 3; i++) {
@@ -83,21 +83,55 @@ double Scene::occlusion(const vec3 &_point, const vec3 &_normal) {
             max_i = i;
         }
     }
-    vec3 x(1);
+    x = vec3(1);
     x[max_i] = -(z[(max_i + 1) % 3] + z[(max_i + 2) % 3]) / z[max_i];
     x = normalize(x);
-    vec3 y = normalize(cross(x, z));
+    y = normalize(cross(x, z));
+}
 
-    int n = 0;
+double Scene::rand(double max) {
+    return distribution(generator) * max;
+}
+
+double Scene::soft_shadow(const vec3 &_light, const vec3 &_point) {
+    vec3 x, y;
+    const vec3 z = normalize(_light - _point);
+    orthonormal_vectors(z, x, y);
+
+    double sum = 0;
     float t;
-    for (int i = 0; i < occlusion_steps; i++) {
+    for (int i = 0; i < monte_carlo_iter; i++) {
+        double r = rand(light_radius);
+        double theta = rand(2 * M_PI);
+        const vec3 light = _light + x * r * cos(theta) + y * r * sin(theta);
+        vec3 dir = light - _point;
+        double distance = norm(dir);
+        dir /= distance;
+        Ray ray(_point + shadow_margin * dir, dir);
+        if (intersect(ray, t) && t < distance) sum += r;
+    }
+
+    double res = 2 * sum / monte_carlo_iter / light_radius;
+    return std::min(res, 1.0);
+}
+
+double Scene::occlusion(const vec3 &_point, const vec3 &_normal) {
+    vec3 x, y;
+    const vec3 &z = _normal;
+    orthonormal_vectors(z, x, y);
+
+    double sum = 0.0;
+    float t;
+    for (int i = 0; i < monte_carlo_iter; i++) {
         double phi = distribution(generator) * M_PI * 2.0;
         double theta = distribution(generator) * M_PI * 0.5;
-        vec3 dir = x * sin(theta) * cos(phi) + y * sin(theta) * sin(phi) + z * cos(theta);
+        double s = sin(theta);
+        vec3 dir = x * s * cos(phi) + y * s * sin(phi) + z * cos(theta);
         Ray ray(_point + shadow_margin * dir, dir);
-        if (intersect(ray, t)) n++;
+        if (intersect(ray, t)) sum += s;
     }
-    return double(n) / occlusion_steps;
+    double res = sum * M_PI / 2 / monte_carlo_iter;
+    return std::min(res, 1.0);
 }
 
 vec3 Scene::lighting(const vec3 &_point, const vec3 &_normal, const vec3 &_view, const Material &_material) {
@@ -106,17 +140,20 @@ vec3 Scene::lighting(const vec3 &_point, const vec3 &_normal, const vec3 &_view,
          ambience * _material.ambient;
 
     for (const Light &light: lights) {
-      vec3 l = normalize(light.position - _point);
-      vec3 r = normalize(mirror(l, _normal));
-      Ray shadow_ray(_point + shadow_margin * l, l);
+        vec3 l = normalize(light.position - _point);
+        vec3 r = normalize(mirror(l, _normal));
 
-      float t;
-      if (!shadow || !(intersect(shadow_ray, t) && t < norm(_point - light.position))) {
-          double dd = dot(_normal, l);
-          if (dd > 0) color += light.color * _material.diffuse * dd;
-          double ds = dot(_view, r);
-          if (ds > 0) color += light.color * _material.specular * pow(ds, _material.shininess);
-      }
+        float t;
+        double dd = dot(_normal, l), ds = dot(_view, r);
+        double coeff =
+            (shadow == none)   ? 1 : (
+            (shadow == simple) ? ((intersect(Ray(_point + shadow_margin * l, l), t) && t < norm(_point - light.position)) ? 0 : 1) :
+                                 (1.0 - soft_shadow(light.position, _point)));
+
+        color += light.color * coeff * (
+            _material.diffuse * std::max(dd, 0.0) +
+            _material.specular * pow(std::max(ds, 0.0), _material.shininess)
+        );
     }
 
     return color;

@@ -13,44 +13,29 @@
 
 using json = nlohmann::json;
 
+void print_help();
+
 int main(int argc, char **argv) {
     // Parse command line arguments
     int c;
-    bool debug = false, shadow = false, occlusion = false;
+    bool debug = false, occlusion = false;
+    shadow_type shadow = none;
     const char *input = NULL, *output = NULL;
-    while((c = getopt(argc, argv, "adsi:o:")) != -1) {
+    while((c = getopt(argc, argv, "adhsSi:o:")) != -1) {
         switch(c) {
-            case 'a':
-                occlusion = true;
-                break;
-            case 'd':
-                debug = true;
-                break;
-            case 's':
-                shadow = true;
-                break;
-            case 'i':
-                input = optarg;
-                break;
-            case 'o':
-                output = optarg;
-                break;
-            case '?':
-                break;
+            case 'a': occlusion = true; break;
+            case 'd': debug = true;     break;
+            case 'h': print_help();     exit(0);
+            case 's': shadow = simple;  break;
+            case 'S': shadow = soft;    break;
+            case 'i': input = optarg;   break;
+            case 'o': output = optarg;  break;
         }
     }
     if (!input) {
         std::cerr << "An input JSON file is not given.\n";
-        std::cerr << "Usage: build/raytracer -i [name].json\n";
-        std::cerr << "       build/raytracer -i [name].json -o [name]\n";
-        std::cerr << "[Ambient occlusion]\n";
-        std::cerr << "       build/raytracer -i [name].json -a\n";
-        std::cerr << "[Debug mode]\n";
-        std::cerr << "       build/raytracer -i [name].json -d\n";
-        std::cerr << "[Shadows]\n";
-        std::cerr << "       build/raytracer -i [name].json -s\n";
-        std::cerr << std::flush;
-        return 1;
+        print_help();
+        exit(1);
     }
 
     // Read an input JSON file
@@ -103,4 +88,15 @@ int main(int argc, char **argv) {
             exit(1);
         }
     }
+}
+
+void print_help() {
+    std::cerr << "Usage: build/raytracer -i [name].json\n";
+    std::cerr << "       -a           enable ambient occlusion\n";
+    std::cerr << "       -d           debug mode\n";
+    std::cerr << "       -h           print help message\n";
+    std::cerr << "       -o [name]    specify output paths";
+    std::cerr << "       -s           enable shadows\n";
+    std::cerr << "       -S           enable soft shadows\n";
+    std::cerr << std::flush;
 }
