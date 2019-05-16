@@ -40,7 +40,7 @@ vec3 Scene::trace(const Ray &_ray, int _depth) {
         if (debug) return vec3(1);
 
         vec3 point = _ray(dist);
-        Material material = objects[ind]->get_material();
+        const Material &material = objects[ind]->material;
 
         vec3 normal = estimate_normal(point);
         vec3 color = lighting(point, normal, normalize(camera.eye_position() - point), material);

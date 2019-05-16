@@ -12,13 +12,12 @@
 using json = nlohmann::json;
 
 class Object {
-protected:
-    Material material;
 public:
+    const Material material;
+
     Object(const json &_j) : material(_j["material"]) {}
     virtual ~Object() {}
     virtual float de(const vec3 &_point) const { throw std::logic_error("Unimplemented"); }
-    const Material &get_material() const { return material; }
 };
 
 class Plane : public Object {
