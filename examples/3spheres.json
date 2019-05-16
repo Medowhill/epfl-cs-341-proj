@@ -27,9 +27,9 @@
         "normal_distance": 0.0001,
         "shadow_margin": 0.01
     },
-    "textures": {
-        "default": {
-            "id": 0,
+    "objects": [
+        { 
+            "id": 1, "center": [0, 1, 0], "radius": 1,
             "material": {
                 "ambient": [1, 0, 0],
                 "diffuse": [1, 0, 0],
@@ -40,66 +40,42 @@
                 "ior": 1.5
             }
         },
-        "constrained": [
-            {
-                "x": [-100, 0],
-                "y": [-0.005, 100],
-                "z": [1.49, 100],
-                "texture": {
-                    "id": 0,
-                    "material": {
-                        "ambient": [0, 1, 0],
-                        "diffuse": [0, 1, 0],
-                        "specular": [1, 1, 1],
-                        "shininess": 200,
-                        "mirror": 0.2,
-                        "transparent": false,
-                        "ior": 1.5
-                    }
-                }
-            },
-            {
-                "x": [1.005, 100],
-                "y": [-0.005, 100],
-                "texture": {
-                    "id": 0,
-                    "material": {
-                        "ambient": [0, 0, 1],
-                        "diffuse": [0, 0, 1],
-                        "specular": [1, 1, 1],
-                        "shininess": 50,
-                        "mirror": 0.2,
-                        "transparent": false,
-                        "ior": 1.5
-                    }
-                }
-            },
-            {
-                "y": [-100, -0.005],
-                "texture": {
-                    "id": 0,
-                    "material": {
-                        "ambient": [0.2, 0.2, 0.2],
-                        "diffuse": [0.2, 0.2, 0.2],
-                        "specular": [0, 0, 0],
-                        "shininess": 100,
-                        "mirror": 0.1,
-                        "transparent": false,
-                        "ior": 1.5
-                    }
-                }
+        { 
+            "id": 1, "center": [-1, 0.5, 2], "radius": 0.5,
+            "material": {
+                "ambient": [0, 1, 0],
+                "diffuse": [0, 1, 0],
+                "specular": [1, 1, 1],
+                "shininess": 200,
+                "mirror": 0.2,
+                "transparent": false,
+                "ior": 1.5
             }
-        ]
-    },
-    "estimator": {
-        "id": 0,
-        "spheres": [
-            { "center": [0, 1, 0], "radius": 1 },
-            { "center": [-1, 0.5, 2], "radius": 0.5 },
-            { "center": [3.01, 2, 1.5], "radius": 2 }
-        ],
-        "plane_z": -0.01,
-        "plane_normal": [0, 1, 0]
-    },
+        },
+        { 
+            "id": 1, "center": [3, 2, 1.5], "radius": 2,
+            "material": {
+                "ambient": [0, 0, 1],
+                "diffuse": [0, 0, 1],
+                "specular": [1, 1, 1],
+                "shininess": 50,
+                "mirror": 0.2,
+                "transparent": false,
+                "ior": 1.5
+            }
+        },
+        {
+            "id": 0, "distance": 0, "normal": [0, 1, 0],
+            "material": {
+                "ambient": [0.2, 0.2, 0.2],
+                "diffuse": [0.2, 0.2, 0.2],
+                "specular": [0, 0, 0],
+                "shininess": 100,
+                "mirror": 0.1,
+                "transparent": false,
+                "ior": 1.5
+            }
+        }
+    ],
     "out": "out/3spheres"
 }

@@ -6,8 +6,7 @@
 #include "Camera.h"
 #include "Light.h"
 #include "Material.h"
-#include "DE.h"
-#include "TexMap.h"
+#include "Object.h"
 
 #include "json.hpp"
 #include <random>
@@ -22,8 +21,7 @@ class Scene {
 private:
     Camera &camera;
     const std::vector<Light> &lights;
-    const DE &de;
-    const TexMap &tex_map;
+    const std::vector<Object *> &objects;
     const vec3 background;
     const vec3 ambience;
     const int max_depth;
@@ -42,8 +40,12 @@ private:
     std::uniform_real_distribution<double> distribution;
 
     vec3 trace(const Ray &_ray, int _depth);
+    float de(const vec3 &_point, int &_ind) const;
+    float de(const vec3 &_point) const;
+    bool intersect(const Ray &_ray, float &_distance, int &_ind) const;
     bool intersect(const Ray &_ray, float &_distance) const;
-    vec3 estimate_normal(const vec3 &point) const;
+    bool intersect(const Ray &_ray) const;
+    vec3 estimate_normal(const vec3 &_point) const;
     void orthonormal_vectors(const vec3 &z, vec3 &x, vec3 &y) const;
     double rand(double max);
     double soft_shadow(const vec3 &_light, const vec3 &_point);
@@ -51,7 +53,7 @@ private:
     vec3 lighting(const vec3 &_point, const vec3 &_normal, const vec3 &_view, const Material &_material);
 
 public:
-    Scene(Camera &_camera, const std::vector<Light> &_lights, const DE &_de, const TexMap &_tex_map,
+    Scene(Camera &_camera, const std::vector<Light> &_lights, const std::vector<Object *> &_objects,
         const json &_j, bool _debug, shadow_type _shadow, bool _ambient_occlusion);
     Image render();
 };

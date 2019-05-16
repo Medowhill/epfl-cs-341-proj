@@ -1,40 +1,30 @@
-#include "DE.h"
+#include "Object.h"
 
 #include <cmath>
 
-SpheresDE::SpheresDE(const json &_j) : plane_z(_j["plane_z"]), plane_normal(_j["plane_normal"]) {
-    std::vector<json> _spheres = _j["spheres"];
-    for (const json &j : _spheres) {
-        sphere s;
-        s.radius = j["radius"];
-        std::vector<double> _c = j["center"];
-        s.center = vec3(_c);
-        spheres.push_back(s);
-    }
+Plane::Plane(const json &_j) : Object(_j), normal(_j["normal"]), distance(_j["distance"]) {}
+
+float Plane::de(const vec3 &_point) const {
+    return std::abs(dot(_point, normal) - distance);
 }
 
-float SpheresDE::operator()(const vec3 &_point) const {
-    float d = std::abs(dot(_point, plane_normal) - plane_z);
-    for (const sphere &s : spheres) {
-        float d1 = norm(_point - s.center) - s.radius;
-        d = std::min(d, d1);
-    }
-    return d;
+Sphere::Sphere(const json &_j) : Object(_j), radius(_j["radius"]), center(_j["center"]) {}
+
+float Sphere::de(const vec3 &_point) const {
+    return norm(_point - center) - radius;
 }
 
-InfiniteSpheresDE::InfiniteSpheresDE(const json &_j) : radius(_j["radius"]), distance(_j["distance"]) {}
+InfiniteSpheres::InfiniteSpheres(const json &_j) : Object(_j), radius(_j["radius"]), distance(_j["distance"]) {}
 
-float InfiniteSpheresDE::operator()(const vec3 &_point) const {
+float InfiniteSpheres::de(const vec3 &_point) const {
     vec3 np(round(_point[0] / distance) * distance, 0, round(_point[2] / distance) * distance);
-    float d0 = norm(np - _point) - radius;
-    float d1 = std::abs(dot(_point, vec3(0, 1, 0)) + radius);
-    return std::min(d0, d1);
+    return norm(np - _point) - radius;
 }
 
-MandelbulbDE::MandelbulbDE(const json &_j) :
+Mandelbulb::Mandelbulb(const json &_j) : Object(_j),
     iter(_j["iter"]), power(_j["power"]), bail_out(_j["bail_out"]), min_distance(_j["min_distance"]) {}
 
-float MandelbulbDE::operator()(const vec3 &_point) const {
+float Mandelbulb::de(const vec3 &_point) const {
     vec3 p = _point;
     float dr = 1, r;
 
@@ -55,10 +45,10 @@ float MandelbulbDE::operator()(const vec3 &_point) const {
     return 0.5 * log(r) * r / dr;
 }
 
-JuliaDE::JuliaDE(const json &_j) :
+Julia::Julia(const json &_j) : Object(_j),
     iter(_j["iter"]), bail_out(_j["bail_out"]), min_distance(_j["min_distance"]), k(_j["k"]), d(_j["d"]) {}
 
-float JuliaDE::operator()(const vec3 &_point) const {
+float Julia::de(const vec3 &_point) const {
     quat q = quat(_point, k);
     quat dq = quat(1, 0, 0, 0);
     double r;

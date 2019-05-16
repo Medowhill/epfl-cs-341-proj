@@ -1,9 +1,8 @@
 #include "Scene.h"
 #include "Image.h"
 #include "Light.h"
-#include "TexMap.h"
 #include "StopWatch.h"
-#include "DE.h"
+#include "Object.h"
 
 #include "json.hpp"
 #include <iostream>
@@ -59,14 +58,13 @@ int main(int argc, char **argv) {
         lights.push_back(Light(light));
     if (lights.empty()) lights.push_back(Light(camera.eye_position(), vec3(1)));
 
-    // Select a distance estimator
-    const DE &de = create_DE(config["estimator"]);
-
-    // Create a texture map
-    TexMap tex_map(config["textures"]);
+    // Create objects
+    std::vector<Object *> objects;
+    for (const json &obj : config["objects"])
+        objects.push_back(create_object(obj));
 
     // Render an image
-    Scene s(camera, lights, de, tex_map, config["scene"], debug, shadow, occlusion);
+    Scene s(camera, lights, objects, config["scene"], debug, shadow, occlusion);
     std::vector<Image> images;
     do {
         StopWatch timer;
@@ -75,7 +73,7 @@ int main(int argc, char **argv) {
         timer.stop();
         std::cout << '(' << camera.current_time() << '/' << camera.duration << ") Time elapsed: " << timer << std::endl;
     } while (camera.move());
-    delete &de;
+    for (Object *obj : objects) delete obj;
 
     // Write the image to a file
     int n = 0;

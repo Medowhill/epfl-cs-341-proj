@@ -23,9 +23,14 @@
         "normal_distance": 0.0001,
         "shadow_margin": 0.1
     },
-    "textures": {
-        "default": {
-            "id": 0,
+    "objects": [
+        {
+            "id": 5,
+            "iter": 100,
+            "bail_out": 100000,
+            "min_distance": 0.01,
+            "d": [-1, 0.2, 0, 0],
+            "k": 0,
             "material": {
                 "ambient": [0.6, 0.6, 0.6],
                 "diffuse": [0.6, 0.6, 0.6],
@@ -35,16 +40,7 @@
                 "transparent": false,
                 "ior": 1.5
             }
-        },
-        "constrained": []
-    },
-    "estimator": {
-        "id": 4,
-        "iter": 100,
-        "bail_out": 100000,
-        "min_distance": 0.01,
-        "d": [-1, 0.2, 0, 0],
-        "k": 0
-    },
+        }
+    ],
     "out": "out/julia"
 }

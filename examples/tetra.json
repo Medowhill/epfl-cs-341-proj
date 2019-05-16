@@ -26,9 +26,11 @@
         "normal_distance": 0.0001,
         "shadow_margin": 0.01
     },
-    "textures": {
-        "default": {
-            "id": 0,
+    "objects": [
+        {
+            "id": 3,
+            "size": 1,
+            "iter": 4,
             "material": {
                 "ambient": [0.8, 0.8, 0.8],
                 "diffuse": [0.8, 0.8, 0.8],
@@ -38,30 +40,7 @@
                 "transparent": false,
                 "ior": 1.5
             }
-        },
-        "constrained": [
-            {
-                "y": [-100, -1.999],
-                "texture": {
-                    "id": 0,
-                    "material": {
-                        "ambient": [0.2, 0.2, 0.2],
-                        "diffuse": [0.2, 0.2, 0.2],
-                        "specular": [0, 0, 0],
-                        "shininess": 100,
-                        "mirror": 0,
-                        "transparent": false,
-                        "ior": 1.5
-                    }
-                }
-            }
-        ]
-    },
-    "estimator": {
-        "id": 2,
-        "size": 1,
-        "iter": 4,
-        "plane_z": -2
-    },
+        }
+    ],
     "out": "out/tetra"
 }

@@ -1,4 +1,4 @@
-#include "DE.h"
+#include "Object.h"
 
 #include <math.h>
 #include <cmath>
@@ -105,7 +105,7 @@ static float tetra_distance(const vec3& p0, const vec3& p1, const vec3& p2, cons
     return std::min(d0, std::min(d1, std::min(d2, d3)));
 }
 
-TetraDE::TetraDE(const json &_j) : iter(_j["iter"]), plane_z(_j["plane_z"]) {
+Tetra::Tetra(const json &_j) : Object(_j), iter(_j["iter"]), plane_z(_j["plane_z"]) {
     double size = _j["size"];
     a1 = vec3(size, size, size);
     a2 = vec3(-size, -size, size);
@@ -113,7 +113,7 @@ TetraDE::TetraDE(const json &_j) : iter(_j["iter"]), plane_z(_j["plane_z"]) {
     a4 = vec3(-size, size, -size);;
 }
 
-float TetraDE::operator()(const vec3 &_point) const {
+float Tetra::de(const vec3 &_point) const {
     vec3 p = _point;
 
     for (int i = 0; i < iter; i++) {
@@ -125,7 +125,5 @@ float TetraDE::operator()(const vec3 &_point) const {
         p = 2 * p - c;
     }
 
-    float d0 = tetra_distance(a1, a2, a3, a4, p) * pow(2, float(-iter));
-    float d1 = std::abs(dot(_point, vec3(0, 1, 0)) - plane_z);
-    return std::min(d0, d1);
+    return tetra_distance(a1, a2, a3, a4, p) * pow(2, float(-iter));
 }
