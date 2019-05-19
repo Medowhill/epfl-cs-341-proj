@@ -5,6 +5,9 @@
 #include <math.h>
 #include <vector>
 
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))  
+#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))  
+
 Scene::Scene(Camera &_camera, const std::vector<Light> &_lights, const std::vector<Object *> &_objects,
     const json &_j, bool _debug, shadow_type _shadow, bool _ambient_occlusion) :
     camera(_camera), lights(_lights), objects(_objects), debug(_debug), shadow(_shadow), ambient_occlusion(_ambient_occlusion),
@@ -31,27 +34,79 @@ Image Scene::render() {
     return img;
 }
 
+vec3 refraction(const vec3 &light, const vec3 &normal, const float &ior) {
+	float cosi_pre = 1 < dot(light, normal) ? 1 : dot(light, normal);
+	float cosi = (-1 > cosi_pre) ? -1 : cosi_pre;
+	float etai = 1, etat = ior;
+	vec3 normal_ref = normal;
+	if (cosi < 0) { cosi = -cosi; }
+	else { etat = 1; etai = ior; normal_ref = -normal; }
+	float eta = etai / etat;
+	float k = 1 - eta * eta*(1 - cosi * cosi);
+	return k < 0 ? 0 : eta * 1 + (eta*cosi - sqrt(k))*normal;
+}
+
+void fresnel(const vec3 &light, const vec3 &normal, const float &ior, float &kr) {
+	float cosi_pre = 1 < dot(light, normal) ? 1 : dot(light, normal);
+	float cosi = (-1 > cosi_pre) ? -1 : cosi_pre;
+	float etai = 1, etat = ior;
+	if (cosi>0){ etat = 1; etai = ior; }
+	float sint = etai / etat * sqrt((0 > (1 - cosi * cosi)) ? (-1) : (1 - cosi * cosi));
+	if (sint >= 1) {
+		kr = 1;
+	}
+	else {
+		float cost = sqrt((0 > (1 - sint * sint)) ? 0 : (1 - sint * sint));
+		cosi = abs(cosi);
+		float Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+		float Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+		kr = (Rs * Rs + Rp * Rp) / 2;
+	}
+}
+
 vec3 Scene::trace(const Ray &_ray, int _depth) {
-    if (_depth > max_depth) return vec3(0);
+	if (_depth > max_depth) return vec3(0);
 
-    float dist;
-    int ind;
-    if (intersect(_ray, dist, ind)) {
-        if (debug) return vec3(1);
+	vec3 color_refraction = 0;
+	vec3 color_reflection = 0;
 
-        vec3 point = _ray(dist);
-        const Material &material = objects[ind]->material;
+	float dist;
+	int ind;
+	if (intersect(_ray, dist, ind)) {
+		if (debug) return vec3(1);
 
-        vec3 normal = estimate_normal(point);
-        vec3 color = lighting(point, normal, normalize(camera.eye_position() - point), material);
+		vec3 point = _ray(dist);
+		const Material &material = objects[ind]->material;
 
-        if (material.mirror != 0) {
-            vec3 direction = reflect(_ray.direction, normal);
-            vec3 origin = point + direction * 0.01;
-            Ray reflected_ray(origin, direction);
-            return (1 - material.mirror) * color + material.mirror * trace(reflected_ray, _depth + 1);
-        } else return color;
-    } else return background;
+		vec3 normal = estimate_normal(point);
+		vec3 color = lighting(point, normal, normalize(camera.eye_position() - point), material);
+		
+		float kr;
+		fresnel(_ray.direction, normal, material.ior, kr);
+		bool outside = dot(_ray.direction, normal) < 0;
+		vec3 bias = 0.01 * normal;
+		if (material.transparent == false && material.mirror == 0) return color;
+		
+		if (kr < 1 && material.transparent == true) {
+			vec3 refraction_dir = normalize(refraction(_ray.direction, normal, material.ior));
+			vec3 refraction_origin = outside ? point - bias : point + bias;
+			Ray refracted_ray(refraction_origin, refraction_dir);
+			color_refraction = trace(refracted_ray,_depth+1);
+		}
+
+		if (material.mirror != 0) {
+			vec3 direction = reflect(_ray.direction, normal);
+			vec3 origin = point + direction * 0.01;
+			Ray reflected_ray(origin, direction);
+			color_reflection = (1 - material.mirror) * color + material.mirror * trace(reflected_ray, _depth + 1);
+		}
+		else color_reflection = color;
+
+		if (kr < 1 && material.transparent == true) return color_reflection * kr + color_refraction * (1 - kr);
+		else return color_reflection;
+	
+	}
+	else return background;
 }
 
 float Scene::de(const vec3 &_point, int &_ind) const {
