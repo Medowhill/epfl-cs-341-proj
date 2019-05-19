@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-Plane::Plane(const json &_j) : Object(_j), normal(_j["normal"]), distance(_j["distance"]) {}
+Plane::Plane(const json &_j) : Object(_j), normal(normalize(vec3(_j["normal"]))), distance(_j["distance"]) {}
 
 float Plane::de(const vec3 &_point) const {
     return std::abs(dot(_point, normal) - distance);

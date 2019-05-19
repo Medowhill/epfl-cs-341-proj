@@ -98,10 +98,6 @@ static float tetra_distance(const vec3& p0, const vec3& p1, const vec3& p2, cons
     double d1 = distance(p0, p1, p3, p);
     double d2 = distance(p0, p2, p3, p);
     double d3 = distance(p1, p2, p3, p);
-
-    double d = 1.f / sqrt(3.f);
-    int sign = (d0 < d && d1 < d && d2 < d && d3 < d) ? -1 : 1;
-    return sign * std::min(d0, std::min(d1, std::min(d2, d3)));
     return std::min(d0, std::min(d1, std::min(d2, d3)));
 }
 

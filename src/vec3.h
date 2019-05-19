@@ -5,7 +5,9 @@
 #include <iostream>
 #include <assert.h>
 #include <math.h>
+#include <cmath>
 #include <vector>
+#include <algorithm>
 
 using json = nlohmann::json;
 
@@ -80,6 +82,33 @@ inline const vec3 reflect(const vec3& v, const vec3& n) {
 }
 inline const vec3 mirror(const vec3& v, const vec3& n) {
     return (2.0 * dot(n,v)) * n - v;
+}
+inline const vec3 refract(const vec3 &v, const vec3 &n, float ior) {
+    float cosi = std::max(std::min(dot(v, n), 1.0), -1.0);
+    float etai = 1, etat = ior;
+    vec3 normal_ref = n;
+    if (cosi < 0) cosi = -cosi;
+    else { etat = 1; etai = ior; normal_ref = -n; }
+    float eta = etai / etat;
+    float k = 1 - eta * eta * (1 - cosi * cosi);
+    return (k < 0) ? vec3(0) : normalize(eta * v + (eta * cosi - sqrt(k)) * n);
+}
+inline float fresnel(const vec3 &v, const vec3 &n, float ior) {
+    float cosi = std::max(std::min(dot(v, n), 1.0), -1.0);
+    float etai = 1, etat = ior;
+    if (cosi > 0) { etat = 1; etai = ior; }
+    float sint = etai / etat * sqrt(std::max(1 - cosi * cosi, 0.f));
+    if (sint >= 1.f) return 1.f;
+    else {
+        float cost = sqrt(std::max(1 - sint * sint, 0.f));
+        cosi = std::abs(cosi);
+        float Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+        float Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+        return (Rs * Rs + Rp * Rp) / 2;
+    }
+}
+inline const vec3 mix(const vec3& v0, const vec3& v1, float alpha) {
+    return v0 * (1 - alpha) + v1 * alpha;
 }
 inline std::ostream& operator<<(std::ostream& os, const vec3& v) {
     os << '(' << v[0] << ", " << v[1] << ", " << v[2] << ')';
