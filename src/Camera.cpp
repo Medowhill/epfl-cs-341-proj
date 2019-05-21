@@ -21,7 +21,7 @@ void Camera::compute_vecs() {
     assert(time <= duration);
 
     std::vector<vec3> points = control_polygon;
-    double t = double(time) / duration, t0 = 1 - t;
+    double t = double(time) / duration;
     int length = points.size();
     while (length-- > 1)
         for (int i = 0; i < length; i++)

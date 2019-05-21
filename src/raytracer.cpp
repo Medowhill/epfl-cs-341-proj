@@ -79,18 +79,21 @@ int main(int argc, char **argv) {
             exit(1);
         }
     }
+    double time = 0;
     do {
         unsigned long t = camera.current_time();
         timer.start();
         Image *image = s.render();
         timer.stop();
         std::cout << '(' << t << '/' << camera.duration << ") Time elapsed: " << timer << std::endl;
+        time += timer.elapsed();
         if (write_video)
             image->write_to_video(video);
         else if (!image->write(image_name))
             std::cerr << "Fail to write the image to " << image_name << '\n' << std::flush;
         delete image;
     } while (camera.move());
+    std::cout << "Average time per a frame: " << (time / (camera.duration + 1)) << " ms/frame" << std::endl;
     for (Object *obj : objects) delete obj;
 }
 
