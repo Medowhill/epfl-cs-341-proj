@@ -21,8 +21,8 @@ $ open out/julia_video.avi
 * `-d` : debug mode
 * `-h` : print help message
 * `-i [name]` : specify the input file path
-* `-o [name]` :    specify the output file path
-* `-s ` : enable shadows
-* `-S ` : enable soft shadows
+* `-o [name]` : specify the output file path
+* `-s` : enable shadows
+* `-S` : enable soft shadows
 ### Documentation
 * [Project GitHub Page](https://medowhill.github.io/epfl-cs-341-proj/)
