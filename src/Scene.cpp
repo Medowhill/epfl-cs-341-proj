@@ -12,13 +12,13 @@ Scene::Scene(Camera &_camera, const std::vector<Light> &_lights, const std::vect
     monte_carlo_iter(_j["monte_carlo_iter"]), min_distance(_j["min_distance"]), max_distance(_j["max_distance"]), normal_distance(_j["normal_distance"]),
     shadow_margin(_j["shadow_margin"]), light_radius(_j["light_radius"]) {}
 
-Image Scene::render() {
-    Image img(camera.width, camera.height);
+Image *Scene::render() {
+    Image *img = new Image(camera.width, camera.height);
 
     auto raytrace_column = [&img, this](int x) {
         for (int y = 0; y < int(camera.height); y++) {
             Ray ray = camera.primary_ray(x, y);
-            img.set_pixel(x, y, min(trace(ray, 0), vec3(1)));
+            img->set_pixel(x, y, min(trace(ray, 0), vec3(1)));
         }
     };
 

@@ -12,7 +12,8 @@
 
 using json = nlohmann::json;
 
-void print_help();
+static void print_help();
+static void save_image(const Image &image, const std::string &name);
 
 int main(int argc, char **argv) {
     // Parse command line arguments
@@ -65,30 +66,20 @@ int main(int argc, char **argv) {
 
     // Render an image
     Scene s(camera, lights, objects, config["scene"], debug, shadow, occlusion);
-    std::vector<Image> images;
+    StopWatch timer;
     do {
-        StopWatch timer;
+        unsigned long t = camera.current_time();
         timer.start();
-        images.push_back(s.render());
+        Image *image = s.render();
         timer.stop();
-        std::cout << '(' << camera.current_time() << '/' << camera.duration << ") Time elapsed: " << timer << std::endl;
+        std::cout << '(' << t << '/' << camera.duration << ") Time elapsed: " << timer << std::endl;
+        save_image(*image, output + std::to_string(t) + ".png");
+        delete image;
     } while (camera.move());
     for (Object *obj : objects) delete obj;
-
-    // Write the image to a file
-    int n = 0;
-    for (const Image &image : images) {
-        std::string name = output + std::to_string(n++) + ".png";
-        if (image.write(name))
-            std::cout << "Succeed to write the image to " << name << std::endl;
-        else {
-            std::cerr << "Fail to write the image to " << name << '\n' << std::flush;
-            exit(1);
-        }
-    }
 }
 
-void print_help() {
+static void print_help() {
     std::cerr << "Usage: build/raytracer -i [name].json\n";
     std::cerr << "       -a           enable ambient occlusion\n";
     std::cerr << "       -d           debug mode\n";
@@ -97,4 +88,13 @@ void print_help() {
     std::cerr << "       -s           enable shadows\n";
     std::cerr << "       -S           enable soft shadows\n";
     std::cerr << std::flush;
+}
+
+static void save_image(const Image &image, const std::string &name) {
+    if (image.write(name))
+        std::cout << "Succeed to write the image to " << name << std::endl;
+    else {
+        std::cerr << "Fail to write the image to " << name << '\n' << std::flush;
+        exit(1);
+    }
 }
