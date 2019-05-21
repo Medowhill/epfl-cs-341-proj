@@ -22,7 +22,7 @@ public:
     vec3(const json &_j);
 
     double& operator[](unsigned int _i);
-    const double operator[](unsigned int _i) const;
+    double operator[](unsigned int _i) const;
     vec3& operator*=(const double s);
     vec3& operator/=(const double s);
     vec3& operator*=(const vec3& v);
@@ -57,10 +57,10 @@ inline const vec3 min(const vec3& v0, const vec3& v1) {
 inline const vec3 max(const vec3& v0, const vec3& v1) {
     return vec3(std::max(v0[0], v1[0]), std::max(v0[1], v1[1]), std::max(v0[2], v1[2]));
 }
-inline const double dot(const vec3& v0, const vec3& v1) {
+inline double dot(const vec3& v0, const vec3& v1) {
     return (v0[0]*v1[0] + v0[1]*v1[1] + v0[2]*v1[2]);
 }
-inline const double norm(const vec3& v) {
+inline double norm(const vec3& v) {
     return sqrt(dot(v,v));
 }
 inline const vec3 normalize(const vec3& v) {
@@ -69,7 +69,7 @@ inline const vec3 normalize(const vec3& v) {
         return vec3(v[0] / n, v[1] / n, v[2] / n);
     return v;
 }
-inline const double distance(const vec3& v0, const vec3& v1) {
+inline double distance(const vec3& v0, const vec3& v1) {
     return norm(v0-v1);
 }
 inline const vec3 cross(const vec3& v0, const vec3& v1) {

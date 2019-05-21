@@ -7,10 +7,11 @@
 
 Scene::Scene(Camera &_camera, const std::vector<Light> &_lights, const std::vector<Object *> &_objects,
     const json &_j, bool _debug, shadow_type _shadow, bool _ambient_occlusion) :
-    camera(_camera), lights(_lights), objects(_objects), debug(_debug), shadow(_shadow), ambient_occlusion(_ambient_occlusion),
-    distribution(0.0, 1.0), background(_j["background"]), ambience(_j["ambience"]), max_depth(_j["max_depth"]), max_ray_steps(_j["max_ray_steps"]),
-    monte_carlo_iter(_j["monte_carlo_iter"]), min_distance(_j["min_distance"]), max_distance(_j["max_distance"]), normal_distance(_j["normal_distance"]),
-    shadow_margin(_j["shadow_margin"]), light_radius(_j["light_radius"]) {}
+    camera(_camera), lights(_lights), objects(_objects), background(_j["background"]), ambience(_j["ambience"]),
+    max_depth(_j["max_depth"]), max_ray_steps(_j["max_ray_steps"]), monte_carlo_iter(_j["monte_carlo_iter"]),
+    min_distance(_j["min_distance"]), max_distance(_j["max_distance"]), normal_distance(_j["normal_distance"]),
+    shadow_margin(_j["shadow_margin"]), light_radius(_j["light_radius"]), debug(_debug),
+    ambient_occlusion(_ambient_occlusion), shadow(_shadow), distribution(0.0, 1.0) {}
 
 Image *Scene::render() {
     Image *img = new Image(camera.width, camera.height);
@@ -68,7 +69,7 @@ vec3 Scene::trace(const Ray &_ray, int _depth) {
 
 float Scene::de(const vec3 &_point, int &_ind) const {
     float min = max_distance + 1;
-    for (int i = 0; i < objects.size(); i++) {
+    for (unsigned i = 0; i < objects.size(); i++) {
         float d = objects[i]->de(_point);
         if (std::abs(d) < std::abs(min)) {
             min = d;

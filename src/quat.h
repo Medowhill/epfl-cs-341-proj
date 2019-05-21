@@ -50,7 +50,7 @@ inline const quat operator*(const quat& q1, const quat& q2) {
 inline const quat operator/(const quat& q, const double s) {
     return quat(q.r / s, q.i / s, q.j / s, q.k / s);
 }
-inline const double size(const quat& q) {
+inline double size(const quat& q) {
     return sqrt(q.r * q.r + q.i * q.i + q.j * q.j + q.k * q.k);
 }
 inline std::ostream& operator<<(std::ostream& os, const quat& q) {

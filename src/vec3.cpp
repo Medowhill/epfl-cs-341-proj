@@ -23,7 +23,7 @@ double& vec3::operator[](unsigned int _i) {
     assert(_i < 3);
     return data_[_i];
 }
-const double vec3::operator[](unsigned int _i) const {
+double vec3::operator[](unsigned int _i) const {
     assert(_i < 3);
     return data_[_i];
 }

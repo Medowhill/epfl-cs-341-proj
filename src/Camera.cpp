@@ -4,12 +4,12 @@
 
 Camera::Camera(const std::vector<vec3> &_control_polygon, const vec3 &_center, const vec3 &_up,
     double _fovy, unsigned int _width, unsigned int _height, unsigned long _duration) :
-    control_polygon(_control_polygon), center(_center), up(_up), fovy(_fovy), width(_width), height(_height), duration(_duration), time(0) {
+    control_polygon(_control_polygon), time(0), center(_center), up(_up), fovy(_fovy), width(_width), height(_height), duration(_duration) {
     compute_vecs();
 }
 
 Camera::Camera(const json &_j) :
-    center(_j["center"]), up(_j["up"]), fovy(_j["fovy"]), width(_j["width"]), height(_j["height"]), duration(_j["duration"]), time(0) {
+    time(0), center(_j["center"]), up(_j["up"]), fovy(_j["fovy"]), width(_j["width"]), height(_j["height"]), duration(_j["duration"]) {
     std::vector<json> _control_polygon = _j["control_polygon"];
     for (const json &j : _control_polygon)
         control_polygon.push_back(vec3(j));
@@ -56,6 +56,6 @@ const vec3 &Camera::eye_position() const {
     return eye;
 }
 
-const unsigned long Camera::current_time() const {
+unsigned long Camera::current_time() const {
     return time;
 }

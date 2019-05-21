@@ -8,7 +8,7 @@ float Plane::de(const vec3 &_point) const {
     return std::abs(dot(_point, normal) - distance);
 }
 
-Sphere::Sphere(const json &_j) : Object(_j), radius(_j["radius"]), center(_j["center"]) {}
+Sphere::Sphere(const json &_j) : Object(_j), center(_j["center"]), radius(_j["radius"]) {}
 
 float Sphere::de(const vec3 &_point) const {
     return norm(_point - center) - radius;

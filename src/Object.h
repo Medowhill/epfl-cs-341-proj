@@ -17,7 +17,7 @@ public:
 
     Object(const json &_j) : material(_j["material"]) {}
     virtual ~Object() {}
-    virtual float de(const vec3 &_point) const { throw std::logic_error("Unimplemented"); }
+    virtual float de(const vec3 &) const { throw std::logic_error("Unimplemented"); }
 };
 
 class Plane : public Object {
