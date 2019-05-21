@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Rendering 3-D Fractal Images via Ray Tracing</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style>
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="icg_report.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Rendering 3-D Fractal Images via Ray Tracing</h1>
+</header>
+<h5 id="group-7-jaemin-hong-and-hyojin-kook">Group 7: Jaemin Hong and Hyojin Kook</h5>
+<h1 id="abstract">Abstract</h1>
+<p>Ray tracing is a rendering technique, which traces paths of lights for pixels in an image plane. Despite its expensive computational cost, it is widely used because it can produce realistic images. In this project, we render various 3-d fractal images via ray tracing. Since directly calculating an intersection between a ray and a fractal object is a nontrivial problem, we use distance estimation and adaptive ray marching to find intersections. Normal vectors at intersection points are estimated via the finite difference method rather than be calculated geometrically. From calculated intersections and normal vectors, we can apply multiple lighting techniques to make images more realistic. In this project, we adopt the Phong lighting, reflection, refraction, soft shadows, and ambient occlusion. In addition, we calculate multiple camera positions based on Bezier curves and create videos by combining multiple rendered images.</p>
+<h1 id="technical-approach">Technical Approach</h1>
+<h2 id="core-goals">Core Goals</h2>
+<h3 id="adaptive-ray-marching">Adaptive Ray Marching</h3>
+<p>Hart et al. suggested the adaptive ray marching technique in 1989. It is useful for rendering objects, whose boundary is not directly known, like 3-d fractals. Instead of computing an intersection at once by solving equations, a ray advances multiple times until the ray becomes close enough to an object. For this purpose, we should define a distance estimation function. The function calculates the minimum distance to the object from a given point. By advancing no more than the return value of the function, the ray avoids passing through the object rather than stopping at an intersection.</p>
+<p>The below <code>intersect</code> function judges whether a given ray intersects with an object in a scene. The <code>de</code> function is a distance estimator.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1-1" title="1"><span class="dt">bool</span> intersect(Ray ray) {</a>
+<a class="sourceLine" id="cb1-2" title="2">    <span class="dt">float</span> distance = <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb1-3" title="3">    <span class="dt">int</span> steps;</a>
+<a class="sourceLine" id="cb1-4" title="4">    <span class="cf">for</span> (steps = <span class="dv">0</span>; steps &lt; max_ray_steps; steps++) {</a>
+<a class="sourceLine" id="cb1-5" title="5">        <span class="dt">float</span> d = de(ray(distance));</a>
+<a class="sourceLine" id="cb1-6" title="6">        distance += d;</a>
+<a class="sourceLine" id="cb1-7" title="7">        <span class="cf">if</span> (d &lt; min_distance) <span class="cf">break</span>;</a>
+<a class="sourceLine" id="cb1-8" title="8">    }</a>
+<a class="sourceLine" id="cb1-9" title="9">    <span class="cf">return</span> steps != max_ray_steps;</a>
+<a class="sourceLine" id="cb1-10" title="10">}</a></code></pre></div>
+<p>The code is simplified for conciseness and one can find real implementation in the <code>Scene.cpp</code> file.</p>
+<h3 id="finite-difference-normal-vectors">Finite Difference Normal Vectors</h3>
+<p>As Hart et al. noted, multiple methods to calculate normal vectors at an intersection point exist. We use the finite difference method, which is easy to implement and precise enough. Since a normal vector at an intersection point has a direction, which increases the distance to the object most fast, we can estimate the normal vector as the gradient vector of a distance estimator function at the intersection. We cannot compute the derivative of each component so that we use the finite difference method to estimate the gradient vector numerically.</p>
+<p>The below <code>estimate_normal</code> function estimate the normal vector at a given point.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb2-1" title="1">vec3 estimate_normal(vec3 point) {</a>
+<a class="sourceLine" id="cb2-2" title="2">    vec3 x(normal_distance, <span class="dv">0</span>, <span class="dv">0</span>), y(<span class="dv">0</span>, normal_distance, <span class="dv">0</span>), z(<span class="dv">0</span>, <span class="dv">0</span>, normal_distance);</a>
+<a class="sourceLine" id="cb2-3" title="3">    <span class="cf">return</span> normalize(vec3(</a>
+<a class="sourceLine" id="cb2-4" title="4">        de(point + x) - de(point - x),</a>
+<a class="sourceLine" id="cb2-5" title="5">        de(point + y) - de(point - y),</a>
+<a class="sourceLine" id="cb2-6" title="6">        de(point + z) - de(point - z)));</a>
+<a class="sourceLine" id="cb2-7" title="7">}</a></code></pre></div>
+<p>The code is simplified for conciseness and one can find real implementation in the <code>Scene.cpp</code> file.</p>
+<h3 id="julia-quaternion-fractals">Julia Quaternion Fractals</h3>
+<p>A Julia quaternion fractal contains every quaternion <span class="math inline">\(z\)</span> such that <span class="math inline">\(f^n(z)\)</span> does not diverges as <span class="math inline">\(n\)</span> goes to the infinity where <span class="math inline">\(f(z)=z^2+d\)</span>, superscript <span class="math inline">\(n\)</span> denotes <span class="math inline">\(n\)</span>-fold application of the function, and <span class="math inline">\(d\)</span> is an arbitrary fixed quaternion. Hart et al. noted that we can use <span class="math inline">\(d(z)=\frac{|f^n(z)|}{2|f&#39;^n(z)|}log|f^n(z)|\)</span> where <span class="math inline">\(n\)</span> is large enough as a distance estimator for Julia fractals. We can find both <span class="math inline">\(f^n\)</span> and <span class="math inline">\(f’^n\)</span> iteratively.</p>
+<ul>
+<li><span class="math inline">\(f^0(z)=z\)</span></li>
+<li><span class="math inline">\(f^{(n+1)}(z)=f^n(z)^2+d\)</span></li>
+<li><span class="math inline">\(f&#39;^0(z)=1\)</span></li>
+<li><span class="math inline">\(f&#39;^{(n+1)}(z)=2f^n(z)f&#39;^n(z)\)</span></li>
+</ul>
+<p>Since Julia fractals exist at a 4-d hyperspace but we can render objects in a 3-d space, we should project the fractals into some 3-d space. In this project, we simply project them into the <span class="math inline">\(k=k’\)</span> space for some real number <span class="math inline">\(k’\)</span>.</p>
+<p>The below <code>de</code> function is the distance estimator for Julia fractals.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb3-1" title="1"><span class="dt">float</span> de(vec3 point) {</a>
+<a class="sourceLine" id="cb3-2" title="2">    quat q = quat(point, k);</a>
+<a class="sourceLine" id="cb3-3" title="3">    quat dq = quat(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>);</a>
+<a class="sourceLine" id="cb3-4" title="4">    <span class="dt">double</span> r;</a>
+<a class="sourceLine" id="cb3-5" title="5">    <span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; iter; i++) {</a>
+<a class="sourceLine" id="cb3-6" title="6">        dq = <span class="dv">2</span> * q * dq;</a>
+<a class="sourceLine" id="cb3-7" title="7">        q = q * q + d;</a>
+<a class="sourceLine" id="cb3-8" title="8">        r = size(q);</a>
+<a class="sourceLine" id="cb3-9" title="9">    }</a>
+<a class="sourceLine" id="cb3-10" title="10">    <span class="cf">return</span> <span class="fl">0.5</span> * log(r) * r / size(dq);</a>
+<a class="sourceLine" id="cb3-11" title="11">}</a></code></pre></div>
+<p>The code is simplified for conciseness and one can find real implementation in the <code>Objects.cpp</code> file.</p>
+<h3 id="comparison-with-the-reference">Comparison with the Reference</h3>
+<h2 id="extensions">Extensions</h2>
+<h3 id="shadows">Shadows</h3>
+<h4 id="soft-shadows">Soft Shadows</h4>
+<p><span class="math inline">\(~~~~\frac{1}{\pi R^2}\int\int_{C}Intersect(P,L(r,\theta))dA\)</span></p>
+<p><span class="math inline">\(=\frac{1}{\pi R^2}\int_{0}^{2\pi}\int_{0}^{R}Intersect(P,L(r,\theta))rdrd\theta\)</span></p>
+<p><span class="math inline">\(=\frac{2\pi R}{\pi R^2}\int_{0}^{2\pi}\int_{0}^{R}Intersect(P,L(r,\theta))r\frac{1}{R}\frac{1}{2\pi}drd\theta\)</span></p>
+<p><span class="math inline">\(=\frac{2}{R}E[Intersect(P,L(r,\theta))\times r]\)</span> where <span class="math inline">\(r\sim U[0,R]\)</span> and <span class="math inline">\(\theta\sim U[0,2\pi]\)</span></p>
+<p><span class="math inline">\(\approx\frac{2}{RN}\sum_{i=1}^{N}Intersect(P,L(r_i,\theta_i))\times r_i\)</span></p>
+<p>We can implement it as the following function:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb4-1" title="1"><span class="dt">double</span> soft_shadow(vec3 light, vec3 point) {</a>
+<a class="sourceLine" id="cb4-2" title="2">    <span class="dt">double</span> sum = <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb4-3" title="3"></a>
+<a class="sourceLine" id="cb4-4" title="4">    <span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; N; i++) {</a>
+<a class="sourceLine" id="cb4-5" title="5">        <span class="dt">double</span> r = rand_uniform(<span class="dv">0</span>, R);</a>
+<a class="sourceLine" id="cb4-6" title="6">        <span class="dt">double</span> theta = rand_uniform(<span class="dv">0</span>, <span class="dv">2</span> * M_PI);</a>
+<a class="sourceLine" id="cb4-7" title="7"></a>
+<a class="sourceLine" id="cb4-8" title="8">        vec3 rand_light = adjust(light, point, r, theta);</a>
+<a class="sourceLine" id="cb4-9" title="9">        <span class="dt">double</span> distance = norm(rand_light - point);</a>
+<a class="sourceLine" id="cb4-10" title="10">        Ray ray(point, rand_light - point);</a>
+<a class="sourceLine" id="cb4-11" title="11"></a>
+<a class="sourceLine" id="cb4-12" title="12">        <span class="dt">float</span> t;</a>
+<a class="sourceLine" id="cb4-13" title="13">        <span class="cf">if</span> (intersect(ray, t) &amp;&amp; t &lt; distance) sum += r;</a>
+<a class="sourceLine" id="cb4-14" title="14">    }</a>
+<a class="sourceLine" id="cb4-15" title="15"></a>
+<a class="sourceLine" id="cb4-16" title="16">    <span class="cf">return</span> <span class="dv">2</span> * sum / N / R;</a>
+<a class="sourceLine" id="cb4-17" title="17">}</a></code></pre></div>
+<p>The code is simplified for conciseness and one can find real implementation in the <code>Scene.cpp</code> file.</p>
+<h3 id="ambient-occlusion">Ambient Occlusion</h3>
+<p><span class="math inline">\(~~~~\frac{1}{2\pi}\int\int_{H}Intersect(\phi,\theta)dS\)</span></p>
+<p><span class="math inline">\(=\frac{1}{2\pi}\int_{0}^{\pi/2}\int_{0}^{2\pi}Intersect(\phi,\theta)sin\theta d\phi d\theta\)</span></p>
+<p><span class="math inline">\(=\frac{2\pi\times\pi/2}{2\pi}\int_{0}^{\pi/2}\int_{0}^{2\pi}Intersect(\phi,\theta)sin\theta\frac{1}{2\pi}\frac{1}{\pi/2}d\phi d\theta\)</span></p>
+<p><span class="math inline">\(=\frac{\pi}{2}E[Intersect(\phi,\theta)\times sin\theta]\)</span> where <span class="math inline">\(\phi\sim U[0,2\pi]\)</span> and <span class="math inline">\(\theta\sim U[0,\pi/2]\)</span></p>
+<p><span class="math inline">\(\approx\frac{\pi}{2N}\sum_{i=1}^{N}Intersect(\phi_i,\theta_i)\times sin\theta_i\)</span></p>
+<p>We can implement it as the following function:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb5-1" title="1"><span class="dt">double</span> occlusion(vec3 point, vec3 normal) {</a>
+<a class="sourceLine" id="cb5-2" title="2">    <span class="dt">double</span> sum = <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb5-3" title="3"></a>
+<a class="sourceLine" id="cb5-4" title="4">    <span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; N; i++) {</a>
+<a class="sourceLine" id="cb5-5" title="5">        <span class="dt">double</span> phi = rand_uniform(<span class="dv">0</span>, M_PI * <span class="fl">2.0</span>);</a>
+<a class="sourceLine" id="cb5-6" title="6">        <span class="dt">double</span> theta = rand_uniform(<span class="dv">0</span>, M_PI * <span class="fl">0.5</span>);</a>
+<a class="sourceLine" id="cb5-7" title="7"></a>
+<a class="sourceLine" id="cb5-8" title="8">        vec3 dir = calculate_dir(normal, phi, theta);</a>
+<a class="sourceLine" id="cb5-9" title="9">        Ray ray(point, dir);</a>
+<a class="sourceLine" id="cb5-10" title="10"></a>
+<a class="sourceLine" id="cb5-11" title="11">        <span class="cf">if</span> (intersect(ray)) sum += sin(theta);</a>
+<a class="sourceLine" id="cb5-12" title="12">    }</a>
+<a class="sourceLine" id="cb5-13" title="13"></a>
+<a class="sourceLine" id="cb5-14" title="14">    <span class="cf">return</span> sum * M_PI / <span class="dv">2</span> / N;</a>
+<a class="sourceLine" id="cb5-15" title="15">}</a></code></pre></div>
+<p>The code is simplified for conciseness and one can find real implementation in the <code>Scene.cpp</code> file.</p>
+<h3 id="refraction">Refraction</h3>
+<h3 id="other-fractals">Other Fractals</h3>
+<h3 id="bezier-curve-based-camera-paths">Bezier-curve-based Camera Paths</h3>
+</body>
+</html>

@@ -102,7 +102,7 @@ static void print_help() {
     std::cerr << "       -a           enable ambient occlusion\n";
     std::cerr << "       -d           debug mode\n";
     std::cerr << "       -h           print help message\n";
-    std::cerr << "       -o [name]    specify output paths";
+    std::cerr << "       -o [name]    specify output paths\n";
     std::cerr << "       -s           enable shadows\n";
     std::cerr << "       -S           enable soft shadows\n";
     std::cerr << std::flush;

@@ -1,3 +1,4 @@
 *.sw[op]
 out
 build
+.DS_Store
