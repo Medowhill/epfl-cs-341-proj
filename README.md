@@ -1,21 +1,28 @@
 # CS-341 Project
 ## Rendering 3-D Fractal Images via Raytracing
 ### Instructions
-* Install `make`, `cmake`, and `g++`.
+* Install `make`, `cmake`, `g++`, and [opencv](https://docs.opencv.org/master/df/d65/tutorial_table_of_content_introduction.html).
 ```shell
 $ mkdir build out
 $ cd build
 $ cmake ..
 $ make
 $ cd ..
-$ build/raytracer -i examples/[name].json
 
-# If you are using macOS, to open the rendered image:
-$ open out/[name].png
+$ build/raytracer -i examples/julia.json
+$ build/raytracer -i examples/julia_video.json
+
+# If you are using macOS:
+$ open out/julia.png
+$ open out/julia_video.avi
 ```
-### Resources
-* [http://blog.hvidtfeldts.net/index.php/2011/06/distance-estimated-3d-fractals-part-i/](http://blog.hvidtfeldts.net/index.php/2011/06/distance-estimated-3d-fractals-part-i/)
-* [http://blog.hvidtfeldts.net/index.php/2011/08/distance-estimated-3d-fractals-ii-lighting-and-coloring/](http://blog.hvidtfeldts.net/index.php/2011/08/distance-estimated-3d-fractals-ii-lighting-and-coloring/)
-* [http://blog.hvidtfeldts.net/index.php/2011/08/distance-estimated-3d-fractals-iii-folding-space/](http://blog.hvidtfeldts.net/index.php/2011/08/distance-estimated-3d-fractals-iii-folding-space/)
-* [http://paulbourke.net/fractals/quatjulia/](http://paulbourke.net/fractals/quatjulia/)
-* Hart, John C., Daniel J. Sandin, and Louis H. Kauffman. "Ray tracing deterministic 3-D fractals." ACM SIGGRAPH computer graphics. Vol. 23. No. 3. ACM, 1989.
+### Options
+* `-a` : enable ambient occlusion
+* `-d` : debug mode
+* `-h` : print help message
+* `-i [name]` : specify the input file path
+* `-o [name]` :    specify the output file path
+* `-s ` : enable shadows
+* `-S ` : enable soft shadows
+### Documentation
+* [Project GitHub Page](https://medowhill.github.io/epfl-cs-341-proj/)
