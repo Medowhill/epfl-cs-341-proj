@@ -22,13 +22,11 @@ void Camera::compute_vecs() {
 
     std::vector<vec3> points = control_polygon;
     double t = double(time) / duration, t0 = 1 - t;
-    while (points.size() > 1) {
-        std::vector <vec3> npoints;
-        for (int i = 0; i < points.size() - 1; i++)
-            npoints.push_back(points.at(i) * t0 + points.at(i + 1) * t);
-        points = npoints;
-    }
-    eye = points.at(0);
+    int length = points.size();
+    while (length-- > 1)
+        for (int i = 0; i < length; i++)
+            points[i] = mix(points[i], points[i + 1], t);
+    eye = points[0];
 
     vec3 view = normalize(center - eye);
     double dist = distance(center, eye);

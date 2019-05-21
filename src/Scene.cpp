@@ -162,8 +162,8 @@ double Scene::occlusion(const vec3 &_point, const vec3 &_normal) {
 
     double sum = 0.0;
     for (int i = 0; i < monte_carlo_iter; i++) {
-        double phi = distribution(generator) * M_PI * 2.0;
-        double theta = distribution(generator) * M_PI * 0.5;
+        double phi = rand(M_PI * 2.0);
+        double theta = rand(M_PI * 0.5);
         double s = sin(theta);
         vec3 dir = x * s * cos(phi) + y * s * sin(phi) + z * cos(theta);
         Ray ray(_point + shadow_margin * dir, dir);
