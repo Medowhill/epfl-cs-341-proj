@@ -18,7 +18,7 @@ Image Scene::render() {
     auto raytrace_column = [&img, this](int x) {
         for (int y = 0; y < int(camera.height); y++) {
             Ray ray = camera.primary_ray(x, y);
-            img(x,y) = min(trace(ray, 0), vec3(1));
+            img.set_pixel(x, y, min(trace(ray, 0), vec3(1)));
         }
     };
 

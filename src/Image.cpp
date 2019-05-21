@@ -12,29 +12,18 @@ Image::Image(unsigned int _width, unsigned int _height) {
 void Image::resize(unsigned int _width, unsigned int _height) {
     width = _width;
     height = _height;
-    pixels_.resize(width * height);
+    pixels.resize(width * height * 3);
 }
 
-vec3& Image::operator()(unsigned int _x, unsigned int _y) {
+void Image::set_pixel(unsigned int _x, unsigned int _y, const vec3 &_color) {
     assert(_x < width);
     assert(_y < height);
-    return pixels_[_y*static_cast<unsigned int>(width) + _x];
-}
 
-const vec3& Image::operator()(unsigned int _x, unsigned int _y) const {
-    assert(_x < width);
-    assert(_y < height);
-    return pixels_[_y*static_cast<unsigned int>(width) + _x];
+    unsigned int index = ((height - 1 - _y) * width + _x) * 3;
+    for (unsigned int i = 0; i < 3; i++)
+       pixels[index + i] = uint8_t(255.0 * _color[i]);
 }
 
 bool Image::write(const std::string &_filename) const {
-    std::vector<uint8_t> image_data(pixels_.size() * 3);
-    for (unsigned int y = 0; y < height; ++y) {
-        for (unsigned int x = 0; x < width; ++x) {
-            unsigned int row = height - 1 - y;
-            for (uint8_t c = 0; c < 3; ++c)
-                image_data[3 * (row * width + x) + c] = static_cast<unsigned char>(255.0 * (*this)(x, y)[c]);
-        }
-    }
-    return !lodepng::encode(_filename, image_data, width, height, LCT_RGB);
+    return !lodepng::encode(_filename, pixels, width, height, LCT_RGB);
 }
