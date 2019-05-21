@@ -31,6 +31,9 @@ elseif(WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_USE_MATH_DEFINES -DNOMINMAX")
 endif()
 
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+
 add_subdirectory(lib/lvandeve)
 add_subdirectory(lib/nlohmann)
 add_subdirectory(src)

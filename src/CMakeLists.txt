@@ -5,3 +5,4 @@ add_executable(raytracer raytracer.cpp ${SRCS} ${HDRS})
 
 target_link_libraries(raytracer lvandeve)
 target_link_libraries(raytracer nlohmann)
+target_link_libraries(raytracer ${OpenCV_LIBS})

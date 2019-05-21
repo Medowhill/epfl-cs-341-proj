@@ -5,6 +5,8 @@
 #include "Object.h"
 
 #include "json.hpp"
+#include <opencv2/core.hpp>
+#include <opencv2/videoio.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -13,7 +15,6 @@
 using json = nlohmann::json;
 
 static void print_help();
-static void save_image(const Image &image, const std::string &name);
 
 int main(int argc, char **argv) {
     // Parse command line arguments
@@ -43,15 +44,18 @@ int main(int argc, char **argv) {
     json config;
     i >> config;
 
+    // Create a camera
+    Camera camera(config["camera"]);
+    bool write_video = camera.duration > 0;
+
     // Print information
     std::string output_ = config["out"];
     if (!output) output = output_.c_str();
     std::cout << "Input file: " << input << std::endl;
-    std::cout << "Output files: " << output << "[n].png" << std::endl;
+    std::string image_name = std::string(output) + ".png";
+    std::string video_name = std::string(output) + ".avi";
+    std::cout << "Output files: " << (write_video ? video_name : image_name) << std::endl;
     std::cout << "Debug mode " << (debug ? "enabled" : "disabled") << std::endl;
-
-    // Create a camera
-    Camera camera(config["camera"]);
 
     // Create lights
     std::vector<Light> lights;
@@ -64,16 +68,27 @@ int main(int argc, char **argv) {
     for (const json &obj : config["objects"])
         objects.push_back(create_object(obj));
 
-    // Render an image
+    // Render images
     Scene s(camera, lights, objects, config["scene"], debug, shadow, occlusion);
     StopWatch timer;
+    cv::VideoWriter video;
+    if (write_video) {
+        int codec = cv::VideoWriter::fourcc('M','J','P','G');
+        if (!video.open(video_name, codec, 20, cv::Size(camera.width, camera.height), true)) {
+            std::cerr << "Fail to write the video to " << video_name << '\n' << std::flush;
+            exit(1);
+        }
+    }
     do {
         unsigned long t = camera.current_time();
         timer.start();
         Image *image = s.render();
         timer.stop();
         std::cout << '(' << t << '/' << camera.duration << ") Time elapsed: " << timer << std::endl;
-        save_image(*image, output + std::to_string(t) + ".png");
+        if (write_video)
+            image->write_to_video(video);
+        else if (!image->write(image_name))
+            std::cerr << "Fail to write the image to " << image_name << '\n' << std::flush;
         delete image;
     } while (camera.move());
     for (Object *obj : objects) delete obj;
@@ -88,13 +103,4 @@ static void print_help() {
     std::cerr << "       -s           enable shadows\n";
     std::cerr << "       -S           enable soft shadows\n";
     std::cerr << std::flush;
-}
-
-static void save_image(const Image &image, const std::string &name) {
-    if (image.write(name))
-        std::cout << "Succeed to write the image to " << name << std::endl;
-    else {
-        std::cerr << "Fail to write the image to " << name << '\n' << std::flush;
-        exit(1);
-    }
 }
