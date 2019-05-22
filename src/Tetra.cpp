@@ -101,7 +101,7 @@ static float tetra_distance(const vec3& p0, const vec3& p1, const vec3& p2, cons
     return std::min(d0, std::min(d1, std::min(d2, d3)));
 }
 
-Tetra::Tetra(const json &_j) : Object(_j), iter(_j["iter"]), plane_z(_j["plane_z"]) {
+Tetra::Tetra(const json &_j) : Object(_j), iter(_j["iter"]) {
     double size = _j["size"];
     a1 = vec3(size, size, size);
     a2 = vec3(-size, -size, size);

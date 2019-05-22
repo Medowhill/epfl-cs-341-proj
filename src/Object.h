@@ -49,7 +49,6 @@ public:
 class Tetra : public Object {
 private:
     const int iter;
-    const float plane_z;
     vec3 a1, a2, a3, a4;
 public:
     Tetra(const json &_j);
