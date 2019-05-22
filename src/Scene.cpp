@@ -5,6 +5,10 @@
 #include <math.h>
 #include <vector>
 
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
+
 Scene::Scene(Camera &_camera, const std::vector<Light> &_lights, const std::vector<Object *> &_objects,
     const json &_j, bool _debug, shadow_type _shadow, bool _ambient_occlusion) :
     camera(_camera), lights(_lights), objects(_objects), background(_j["background"]), ambience(_j["ambience"]),
