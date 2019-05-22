@@ -12,9 +12,9 @@
         "center": [0, 0, 0],
         "up": [0, 1, 0],
         "fovy": 45,
-        "width": 180,
-        "height": 90,
-        "duration": 100
+        "width": 1280,
+        "height": 360,
+        "duration": 200
     },
     "lights": [
         { "position": [3, 3, 3], "color": [1, 1, 1] }

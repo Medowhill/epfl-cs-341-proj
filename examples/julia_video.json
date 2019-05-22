@@ -12,8 +12,8 @@
         "center": [0, 0, 0],
         "up": [0, 1, 0],
         "fovy": 45,
-        "width": 160,
-        "height": 90,
+        "width": 1280,
+        "height": 720,
         "duration": 200
     },
     "lights": [
