@@ -24,11 +24,18 @@ Image *Scene::render() {
     };
 
 #if defined(_OPENMP)
+    std::cout << omp_get_num_procs() << " CPUs are available." << std::endl;
 #pragma omp parallel for
-    std::cout << "Using " omp_get_num_threads() << " threads." << std::endl;
 #endif
-    for (int x = 0; x < int(camera.width); x++)
+    for (int x = 0; x < int(camera.width); x++) {
+#if defined(_OPENMP)
+        if (omp_get_thread_num() == 0) {
+            std::cout << omp_get_max_threads() << " threads are available." << std::endl;
+            std::cout << omp_get_num_procs() << " threads are created." << std::endl;
+        }
+#endif
         raytrace_column(x);
+    }
 
     return img;
 }
