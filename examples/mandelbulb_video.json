@@ -1,0 +1,54 @@
+{
+    "camera": {
+        "control_polygon": [
+            [-1, 0, 4.5],
+            [-1.5, 0, 3],
+            [0, 4, 0],
+            [6, 0, 3],
+            [6, -1, -3],
+            [-3, -2, -1.5],
+            [-3, -3, -1.5]
+        ],
+        "center": [0, 0, 0],
+        "up": [0, 1, 0],
+        "fovy": 45,
+        "width": 640,
+        "height": 360,
+        "duration": 200
+    },
+    "lights": [
+        { "position": [-5, 0, 10], "color": [0.8, 0.8, 0.8] },
+        { "position": [5, 0, -10], "color": [0.8, 0.8, 0.8] }
+    ],
+    "scene": {
+        "background": [0, 0, 0],
+        "ambience": [0.2, 0.2, 0.2],
+        "max_depth": 0,
+        "max_ray_steps": 500,
+        "monte_carlo_iter": 100,
+        "light_radius": 0.5,
+        "min_distance": 0.01,
+        "max_distance": 20,
+        "normal_distance": 0.0001,
+        "shadow_margin": 0.1
+    },
+    "objects": [
+        {
+            "id": 4,
+            "iter": 20,
+            "power": 8,
+            "bail_out": 10000,
+            "min_distance": 0.01,
+            "material": {
+                "ambient": [0.6, 0.6, 0.6],
+                "diffuse": [0.6, 0.6, 0.6],
+                "specular": [1, 1, 1],
+                "shininess": 50,
+                "mirror": 0,
+                "transparent": false,
+                "ior": 1.5
+            }
+        }
+    ],
+    "out": "out/mandelbulb_video"
+}
