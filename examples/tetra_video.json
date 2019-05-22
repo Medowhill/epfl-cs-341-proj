@@ -1,0 +1,52 @@
+{
+    "camera": {
+        "control_polygon": [
+            [-4, -4, 0],
+            [-2.5, -2.5, 0],
+            [2.5, -2.5, 0],
+            [2.2, 0, 2.2],
+            [2.2, 0, -2.2],
+            [2.2, 2.2, -2.2],
+            [0.1, 0.1, -0.1]
+        ],
+        "center": [0, 0, 0],
+        "up": [0, 1, 0],
+        "fovy": 45,
+        "width": 160,
+        "height": 90,
+        "duration": 60
+    },
+    "lights": [
+        { "position": [-5, 0, 10], "color": [0.8, 0.8, 0.8] },
+        { "position": [5, 0, -10], "color": [0.8, 0.8, 0.8] }
+    ],
+    "scene": {
+        "background": [0, 0, 0],
+        "ambience": [0.2, 0.2, 0.2],
+        "max_depth": 0,
+        "max_ray_steps": 500,
+        "monte_carlo_iter": 100,
+        "light_radius": 0.5,
+        "min_distance": 0.0001,
+        "max_distance": 20,
+        "normal_distance": 0.0001,
+        "shadow_margin": 0.01
+    },
+    "objects": [
+        {
+            "id": 3,
+            "size": 1,
+            "iter": 4,
+            "material": {
+                "ambient": [0.8, 0.8, 0.8],
+                "diffuse": [0.8, 0.8, 0.8],
+                "specular": [1, 1, 1],
+                "shininess": 100,
+                "mirror": 0,
+                "transparent": false,
+                "ior": 1.5
+            }
+        }
+    ],
+    "out": "out/tetra_video"
+}

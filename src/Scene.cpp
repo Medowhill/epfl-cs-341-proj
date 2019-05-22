@@ -25,6 +25,7 @@ Image *Scene::render() {
 
 #if defined(_OPENMP)
 #pragma omp parallel for
+    std::cout << "Using " omp_get_num_threads() << " threads." << std::endl;
 #endif
     for (int x = 0; x < int(camera.width); x++)
         raytrace_column(x);
