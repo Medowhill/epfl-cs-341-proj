@@ -50,5 +50,6 @@
             }
         }
     ],
+    "fps": 30,
     "out": "out/mandelbulb_video"
 }

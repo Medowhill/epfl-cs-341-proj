@@ -48,5 +48,6 @@
             }
         }
     ],
+    "fps": 30,
     "out": "out/tetra_video"
 }

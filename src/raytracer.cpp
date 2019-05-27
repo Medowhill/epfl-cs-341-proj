@@ -74,7 +74,8 @@ int main(int argc, char **argv) {
     cv::VideoWriter video;
     if (write_video) {
         int codec = cv::VideoWriter::fourcc('M','J','P','G');
-        if (!video.open(video_name, codec, 20, cv::Size(camera.width, camera.height), true)) {
+        int fps = config["fps"];
+        if (!video.open(video_name, codec, fps, cv::Size(camera.width, camera.height), true)) {
             std::cerr << "Fail to write the video to " << video_name << '\n' << std::flush;
             exit(1);
         }

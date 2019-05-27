@@ -51,5 +51,6 @@
             }
         }
     ],
+    "fps": 30,
     "out": "out/julia_video"
 }

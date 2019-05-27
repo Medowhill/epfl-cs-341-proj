@@ -55,5 +55,6 @@
             }
         }
     ],
+    "fps": 30,
     "out": "out/sphere_video"
 }

@@ -122,5 +122,6 @@
             }
         }
     ],
+    "fps": 30,
     "out": "out/glass_julia_video"
 }
