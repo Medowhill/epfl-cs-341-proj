@@ -89,8 +89,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Ray tracing is a rendering technique, which traces paths of lights for pixels in an image plane. Despite its expensive computational cost, it is widely used because it can produce realistic images. In this project, we render various 3-d fractal images via ray tracing. Since directly calculating an intersection between a ray and a fractal object is a nontrivial problem, we use distance estimation and adaptive ray marching to find intersections. Normal vectors at intersection points are estimated via the finite difference method rather than be calculated geometrically. From calculated intersections and normal vectors, we can apply multiple lighting techniques to make images more realistic. In this project, we adopt the Phong lighting, reflection, refraction, soft shadows, and ambient occlusion. In addition, we calculate multiple camera positions based on Bezier curves and create videos by combining multiple rendered images.</p>
 <h1 id="technical-approach">Technical Approach</h1>
 <h2 id="core-goals">Core Goals</h2>
+<p>Theoretical backgrounds of our core goals are given by paper <em>Ray</em> <em>Tracing</em> <em>Deterministic</em> <em>3-D</em> <em>Fractals</em> of John C. Hart, Daniel J. Sandin, and Louis H. Kauffman.</p>
 <h3 id="adaptive-ray-marching">Adaptive Ray Marching</h3>
-<p>Hart et al. suggested the adaptive ray marching technique in 1989. It is useful for rendering objects, whose boundary is not directly known, like 3-d fractals. Instead of computing an intersection at once by solving equations, a ray advances multiple times until the ray becomes close enough to an object. For this purpose, we should define a distance estimation function. The function calculates the minimum distance to the object from a given point. By advancing no more than the return value of the function, the ray avoids passing through the object rather than stopping at an intersection.</p>
+<p>Hart et al. suggested the adaptive ray marching technique. It is useful for rendering objects, whose boundary is not directly known, like 3-d fractals. Instead of computing an intersection at once by solving equations, a ray advances multiple times until the ray becomes close enough to an object. For this purpose, we should define a distance estimation function. The function calculates the minimum distance to the object from a given point. By advancing no more than the return value of the function, the ray avoids passing through the object rather than stopping at an intersection.</p>
 <p>The below <code>intersect</code> function judges whether a given ray intersects with an object in a scene. The <code>de</code> function is a distance estimator.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb1-1" title="1"><span class="dt">bool</span> intersect(Ray ray) {</a>
 <a class="sourceLine" id="cb1-2" title="2">    <span class="dt">float</span> distance = <span class="dv">0</span>;</a>
@@ -137,58 +138,229 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <a class="sourceLine" id="cb3-11" title="11">}</a></code></pre></div>
 <p>The code is simplified for conciseness and one can find real implementation in the <code>Objects.cpp</code> file.</p>
 <h3 id="comparison-with-the-reference">Comparison with the Reference</h3>
+<p>Our implementation basically follows the paper.</p>
+<p>In the paper, Section 3 discussed a way to find intersections between rays and fractal objects. We used the ray marching as they suggested in Section 3.1 and 3.2. In addition, we introduced a maximum distance of an increment as mentioned in Section 3.4. On the other hand, they suggested a minimum distance of an increment for faster convergence in Section 3.3 but, if an estimated distance is shorter than the minimum distance, we simply determined that a ray intersects with an object instead of forwarding a ray by the minimum distance. Our distance estimator for the Julia fractals is identical to their suggestion in Section 3.1.</p>
+<p>Section 4 was about estimating normal vectors and the clarity of images. They proposed two methods to estimated normal vectors: Z-buffer neighbors in Section 4.1.1 and Gradient Computation in Section 4.1.2. We implemented only gradient computation since it fits better to the ray tracing. Section 4.2 shows how to control the clarity of images by adjusting minimum distances dynamically. However, because we did not use a minimum distance as the criterion of intersecting rather than the shortest distance to proceed a ray, we decided not to implement dynamic minimum distances.</p>
 <h2 id="extensions">Extensions</h2>
 <h3 id="shadows">Shadows</h3>
-<h4 id="soft-shadows">Soft Shadows</h4>
-<p><span class="math inline">\(~~~~\frac{1}{\pi R^2}\int\int_{C}Intersect(P,L(r,\theta))dA\)</span></p>
-<p><span class="math inline">\(=\frac{1}{\pi R^2}\int_{0}^{2\pi}\int_{0}^{R}Intersect(P,L(r,\theta))rdrd\theta\)</span></p>
-<p><span class="math inline">\(=\frac{2\pi R}{\pi R^2}\int_{0}^{2\pi}\int_{0}^{R}Intersect(P,L(r,\theta))r\frac{1}{R}\frac{1}{2\pi}drd\theta\)</span></p>
-<p><span class="math inline">\(=\frac{2}{R}E[Intersect(P,L(r,\theta))\times r]\)</span> where <span class="math inline">\(r\sim U[0,R]\)</span> and <span class="math inline">\(\theta\sim U[0,2\pi]\)</span></p>
-<p><span class="math inline">\(\approx\frac{2}{RN}\sum_{i=1}^{N}Intersect(P,L(r_i,\theta_i))\times r_i\)</span></p>
-<p>We can implement it as the following function:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb4-1" title="1"><span class="dt">double</span> soft_shadow(vec3 light, vec3 point) {</a>
-<a class="sourceLine" id="cb4-2" title="2">    <span class="dt">double</span> sum = <span class="dv">0</span>;</a>
+<p>We can easily add shadows into images by shooting a ray from an intersection point to a light source as done in the assignment.</p>
+<p>The below <code>lighting</code> function calculates the color at a given point by considering shadows.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb4-1" title="1">vec3 lighting(vec3 point, vec3 normal, vec3 view, Material material) {</a>
+<a class="sourceLine" id="cb4-2" title="2">    vec3 color = ambience * material.ambient;</a>
 <a class="sourceLine" id="cb4-3" title="3"></a>
-<a class="sourceLine" id="cb4-4" title="4">    <span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; N; i++) {</a>
-<a class="sourceLine" id="cb4-5" title="5">        <span class="dt">double</span> r = rand_uniform(<span class="dv">0</span>, R);</a>
-<a class="sourceLine" id="cb4-6" title="6">        <span class="dt">double</span> theta = rand_uniform(<span class="dv">0</span>, <span class="dv">2</span> * M_PI);</a>
-<a class="sourceLine" id="cb4-7" title="7"></a>
-<a class="sourceLine" id="cb4-8" title="8">        vec3 rand_light = adjust(light, point, r, theta);</a>
-<a class="sourceLine" id="cb4-9" title="9">        <span class="dt">double</span> distance = norm(rand_light - point);</a>
-<a class="sourceLine" id="cb4-10" title="10">        Ray ray(point, rand_light - point);</a>
-<a class="sourceLine" id="cb4-11" title="11"></a>
-<a class="sourceLine" id="cb4-12" title="12">        <span class="dt">float</span> t;</a>
-<a class="sourceLine" id="cb4-13" title="13">        <span class="cf">if</span> (intersect(ray, t) &amp;&amp; t &lt; distance) sum += r;</a>
-<a class="sourceLine" id="cb4-14" title="14">    }</a>
-<a class="sourceLine" id="cb4-15" title="15"></a>
-<a class="sourceLine" id="cb4-16" title="16">    <span class="cf">return</span> <span class="dv">2</span> * sum / N / R;</a>
-<a class="sourceLine" id="cb4-17" title="17">}</a></code></pre></div>
+<a class="sourceLine" id="cb4-4" title="4">    <span class="cf">for</span> (Light light: lights) {</a>
+<a class="sourceLine" id="cb4-5" title="5">        vec3 l = normalize(light.position - point);</a>
+<a class="sourceLine" id="cb4-6" title="6">        vec3 r = normalize(mirror(l, normal));</a>
+<a class="sourceLine" id="cb4-7" title="7">        <span class="dt">double</span> dd = dot(normal, l), ds = dot(view, r);</a>
+<a class="sourceLine" id="cb4-8" title="8"></a>
+<a class="sourceLine" id="cb4-9" title="9">        Ray ray(point + margin * l, l);</a>
+<a class="sourceLine" id="cb4-10" title="10">        <span class="dt">float</span> t;</a>
+<a class="sourceLine" id="cb4-11" title="11">        <span class="cf">if</span> (!(intersect(ray, t) &amp;&amp; t &lt; norm(point - light.position)))</a>
+<a class="sourceLine" id="cb4-12" title="12">            color += light.color *</a>
+<a class="sourceLine" id="cb4-13" title="13">                (material.diffuse * max(dd, <span class="dv">0</span>) +</a>
+<a class="sourceLine" id="cb4-14" title="14">                    material.specular * pow(max(ds, <span class="dv">0</span>), material.shininess));</a>
+<a class="sourceLine" id="cb4-15" title="15">    }</a>
+<a class="sourceLine" id="cb4-16" title="16"></a>
+<a class="sourceLine" id="cb4-17" title="17">    <span class="cf">return</span> color;</a>
+<a class="sourceLine" id="cb4-18" title="18">}</a></code></pre></div>
 <p>The code is simplified for conciseness and one can find real implementation in the <code>Scene.cpp</code> file.</p>
-<h3 id="ambient-occlusion">Ambient Occlusion</h3>
-<p><span class="math inline">\(~~~~\frac{1}{2\pi}\int\int_{H}Intersect(\phi,\theta)dS\)</span></p>
-<p><span class="math inline">\(=\frac{1}{2\pi}\int_{0}^{\pi/2}\int_{0}^{2\pi}Intersect(\phi,\theta)sin\theta d\phi d\theta\)</span></p>
-<p><span class="math inline">\(=\frac{2\pi\times\pi/2}{2\pi}\int_{0}^{\pi/2}\int_{0}^{2\pi}Intersect(\phi,\theta)sin\theta\frac{1}{2\pi}\frac{1}{\pi/2}d\phi d\theta\)</span></p>
-<p><span class="math inline">\(=\frac{\pi}{2}E[Intersect(\phi,\theta)\times sin\theta]\)</span> where <span class="math inline">\(\phi\sim U[0,2\pi]\)</span> and <span class="math inline">\(\theta\sim U[0,\pi/2]\)</span></p>
-<p><span class="math inline">\(\approx\frac{\pi}{2N}\sum_{i=1}^{N}Intersect(\phi_i,\theta_i)\times sin\theta_i\)</span></p>
+<h4 id="soft-shadows">Soft Shadows</h4>
+<p>To create more realistic images, we can use soft shadows by treating a light source as a small circle instead of a single point. We simply assumed that light source is a circle, which is parallel to the tangent plane of an object at an intersection point. The intensity of light reaches the intersection point is a proportion of the circle that is not hidden by the object. To calculate the proportion hidden, we used the Monte Carlo method. We shot lots of rays from the intersection and decided the proportion stochastically. It is computationally expensive but easy to implement. Since performance is not the most important aim for off-line rendering, we chose it. The following is the mathematical validation of our implementation:</p>
+<p><span class="math inline">\(~~~~{\sf soft\_shadow}(P)\)</span></p>
+<p><span class="math inline">\(=\frac{1}{\pi R^2}\int\int_{C}{\sf Intersect}(P,L(r,\theta))dA\)</span></p>
+<p><span class="math inline">\(=\frac{1}{\pi R^2}\int_{0}^{2\pi}\int_{0}^{R}{\sf Intersect}(P,L(r,\theta))rdrd\theta\)</span></p>
+<p><span class="math inline">\(=\frac{2\pi R}{\pi R^2}\int_{0}^{2\pi}\int_{0}^{R}{\sf Intersect}(P,L(r,\theta))r\frac{1}{R}\frac{1}{2\pi}drd\theta\)</span></p>
+<p><span class="math inline">\(=\frac{2}{R}E[{\sf Intersect}(P,L(r,\theta))\times r]\)</span> where <span class="math inline">\(r\sim U[0,R]\)</span> and <span class="math inline">\(\theta\sim U[0,2\pi]\)</span></p>
+<p><span class="math inline">\(\approx\frac{2}{RN}\sum_{i=1}^{N}{\sf Intersect}(P,L(r_i,\theta_i))\times r_i\)</span></p>
+<p>(<span class="math inline">\({\sf Intersect}\)</span> returns one if a ray intersects and zero otherwise.)</p>
 <p>We can implement it as the following function:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb5-1" title="1"><span class="dt">double</span> occlusion(vec3 point, vec3 normal) {</a>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb5-1" title="1"><span class="dt">double</span> soft_shadow(vec3 light, vec3 point) {</a>
 <a class="sourceLine" id="cb5-2" title="2">    <span class="dt">double</span> sum = <span class="dv">0</span>;</a>
 <a class="sourceLine" id="cb5-3" title="3"></a>
 <a class="sourceLine" id="cb5-4" title="4">    <span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; N; i++) {</a>
-<a class="sourceLine" id="cb5-5" title="5">        <span class="dt">double</span> phi = rand_uniform(<span class="dv">0</span>, M_PI * <span class="fl">2.0</span>);</a>
-<a class="sourceLine" id="cb5-6" title="6">        <span class="dt">double</span> theta = rand_uniform(<span class="dv">0</span>, M_PI * <span class="fl">0.5</span>);</a>
+<a class="sourceLine" id="cb5-5" title="5">        <span class="dt">double</span> r = rand_uniform(<span class="dv">0</span>, R);</a>
+<a class="sourceLine" id="cb5-6" title="6">        <span class="dt">double</span> theta = rand_uniform(<span class="dv">0</span>, <span class="dv">2</span> * M_PI);</a>
 <a class="sourceLine" id="cb5-7" title="7"></a>
-<a class="sourceLine" id="cb5-8" title="8">        vec3 dir = calculate_dir(normal, phi, theta);</a>
-<a class="sourceLine" id="cb5-9" title="9">        Ray ray(point, dir);</a>
-<a class="sourceLine" id="cb5-10" title="10"></a>
-<a class="sourceLine" id="cb5-11" title="11">        <span class="cf">if</span> (intersect(ray)) sum += sin(theta);</a>
-<a class="sourceLine" id="cb5-12" title="12">    }</a>
-<a class="sourceLine" id="cb5-13" title="13"></a>
-<a class="sourceLine" id="cb5-14" title="14">    <span class="cf">return</span> sum * M_PI / <span class="dv">2</span> / N;</a>
-<a class="sourceLine" id="cb5-15" title="15">}</a></code></pre></div>
+<a class="sourceLine" id="cb5-8" title="8">        vec3 rand_light = adjust(light, point, r, theta);</a>
+<a class="sourceLine" id="cb5-9" title="9">        vec3 l = rand_light - point;</a>
+<a class="sourceLine" id="cb5-10" title="10">        <span class="dt">double</span> distance = norm(l);</a>
+<a class="sourceLine" id="cb5-11" title="11">        Ray ray(point + margin * l, l);</a>
+<a class="sourceLine" id="cb5-12" title="12"></a>
+<a class="sourceLine" id="cb5-13" title="13">        <span class="dt">float</span> t;</a>
+<a class="sourceLine" id="cb5-14" title="14">        <span class="cf">if</span> (intersect(ray, t) &amp;&amp; t &lt; distance) sum += r;</a>
+<a class="sourceLine" id="cb5-15" title="15">    }</a>
+<a class="sourceLine" id="cb5-16" title="16"></a>
+<a class="sourceLine" id="cb5-17" title="17">    <span class="cf">return</span> <span class="dv">2</span> * sum / N / R;</a>
+<a class="sourceLine" id="cb5-18" title="18">}</a></code></pre></div>
+<p>The <code>lighting</code> function can be modified as the following:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb6-1" title="1">vec3 lighting(vec3 point, vec3 normal, vec3 view, Material material) {</a>
+<a class="sourceLine" id="cb6-2" title="2">    vec3 color = ambience * material.ambient;</a>
+<a class="sourceLine" id="cb6-3" title="3"></a>
+<a class="sourceLine" id="cb6-4" title="4">    <span class="cf">for</span> (Light light: lights) {</a>
+<a class="sourceLine" id="cb6-5" title="5">        vec3 l = normalize(light.position - point);</a>
+<a class="sourceLine" id="cb6-6" title="6">        vec3 r = normalize(mirror(l, normal));</a>
+<a class="sourceLine" id="cb6-7" title="7">        <span class="dt">double</span> dd = dot(normal, l), ds = dot(view, r);</a>
+<a class="sourceLine" id="cb6-8" title="8"></a>
+<a class="sourceLine" id="cb6-9" title="9">        color += light.color * (<span class="dv">1</span> - soft_shadow(light.position, point)) *</a>
+<a class="sourceLine" id="cb6-10" title="10">            (material.diffuse * max(dd, <span class="dv">0</span>) +</a>
+<a class="sourceLine" id="cb6-11" title="11">                material.specular * pow(max(ds, <span class="dv">0</span>), material.shininess));</a>
+<a class="sourceLine" id="cb6-12" title="12">    }</a>
+<a class="sourceLine" id="cb6-13" title="13"></a>
+<a class="sourceLine" id="cb6-14" title="14">    <span class="cf">return</span> color;</a>
+<a class="sourceLine" id="cb6-15" title="15">}</a></code></pre></div>
+<p>The code is simplified for conciseness and one can find real implementation in the <code>Scene.cpp</code> file.</p>
+<h3 id="ambient-occlusion">Ambient Occlusion</h3>
+<p>Ambient occlusion calculates how much a point receives the ambient light. In the Phong lighting, the intensity of the ambient light is constant so that every point is exposed to an equal amount of the ambient light. However, this assumption is not realistic since if more surface surrounds a point, then less ambient light is able to reach the point. Therefore, ambient occlusion is an important technique to render realistic images and to express detail of images.</p>
+<p>Like soft shadows in the previous section, we used the Monte Carlo method to implement ambient occlusion. We shot rays from a point to random points above the tangent plane of an object at the point. As more rays intersect with objects, the point is more occluded and receives less ambient light. The following is the mathematical validation of our implementation:</p>
+<p><span class="math inline">\(~~~~{\sf occlusion}(P)\)</span></p>
+<p><span class="math inline">\(=\frac{1}{2\pi}\int\int_{H}{\sf Intersect}(\phi,\theta)dS\)</span></p>
+<p><span class="math inline">\(=\frac{1}{2\pi}\int_{0}^{\pi/2}\int_{0}^{2\pi}{\sf Intersect}(\phi,\theta){\sf sin}\theta d\phi d\theta\)</span></p>
+<p><span class="math inline">\(=\frac{2\pi\times\pi/2}{2\pi}\int_{0}^{\pi/2}\int_{0}^{2\pi}{\sf Intersect}(\phi,\theta){\sf sin}\theta\frac{1}{2\pi}\frac{1}{\pi/2}d\phi d\theta\)</span></p>
+<p><span class="math inline">\(=\frac{\pi}{2}E[{\sf Intersect}(\phi,\theta)\times {\sf sin}\theta]\)</span> where <span class="math inline">\(\phi\sim U[0,2\pi]\)</span> and <span class="math inline">\(\theta\sim U[0,\pi/2]\)</span></p>
+<p><span class="math inline">\(\approx\frac{\pi}{2N}\sum_{i=1}^{N}{\sf Intersect}(\phi_i,\theta_i)\times {\sf sin}\theta_i\)</span></p>
+<p>(<span class="math inline">\({\sf Intersect}\)</span> returns one if a ray intersects and zero otherwise.)</p>
+<p>We can implement it as the following function:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb7-1" title="1"><span class="dt">double</span> occlusion(vec3 point, vec3 normal) {</a>
+<a class="sourceLine" id="cb7-2" title="2">    <span class="dt">double</span> sum = <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb7-3" title="3"></a>
+<a class="sourceLine" id="cb7-4" title="4">    <span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; N; i++) {</a>
+<a class="sourceLine" id="cb7-5" title="5">        <span class="dt">double</span> phi = rand_uniform(<span class="dv">0</span>, M_PI * <span class="fl">2.0</span>);</a>
+<a class="sourceLine" id="cb7-6" title="6">        <span class="dt">double</span> theta = rand_uniform(<span class="dv">0</span>, M_PI * <span class="fl">0.5</span>);</a>
+<a class="sourceLine" id="cb7-7" title="7"></a>
+<a class="sourceLine" id="cb7-8" title="8">        vec3 dir = calculate_dir(normal, phi, theta);</a>
+<a class="sourceLine" id="cb7-9" title="9">        Ray ray(point + margin * dir, dir);</a>
+<a class="sourceLine" id="cb7-10" title="10"></a>
+<a class="sourceLine" id="cb7-11" title="11">        <span class="cf">if</span> (intersect(ray)) sum += sin(theta);</a>
+<a class="sourceLine" id="cb7-12" title="12">    }</a>
+<a class="sourceLine" id="cb7-13" title="13"></a>
+<a class="sourceLine" id="cb7-14" title="14">    <span class="cf">return</span> sum * M_PI / <span class="dv">2</span> / N;</a>
+<a class="sourceLine" id="cb7-15" title="15">}</a></code></pre></div>
+<p>The <code>lighting</code> function can be modified as the following:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb8-1" title="1">vec3 lighting(vec3 point, vec3 normal, vec3 view, Material material) {</a>
+<a class="sourceLine" id="cb8-2" title="2">    vec3 color = ambience * (<span class="dv">1</span> - occlusion(point, normal)) * material.ambient;</a>
+<a class="sourceLine" id="cb8-3" title="3"></a>
+<a class="sourceLine" id="cb8-4" title="4">    <span class="cf">for</span> (Light light: lights) {</a>
+<a class="sourceLine" id="cb8-5" title="5">        vec3 l = normalize(light.position - point);</a>
+<a class="sourceLine" id="cb8-6" title="6">        vec3 r = normalize(mirror(l, normal));</a>
+<a class="sourceLine" id="cb8-7" title="7">        <span class="dt">double</span> dd = dot(normal, l), ds = dot(view, r);</a>
+<a class="sourceLine" id="cb8-8" title="8">        color += light.color *</a>
+<a class="sourceLine" id="cb8-9" title="9">            (material.diffuse * max(dd, <span class="dv">0</span>) +</a>
+<a class="sourceLine" id="cb8-10" title="10">                material.specular * pow(max(ds, <span class="dv">0</span>), material.shininess));</a>
+<a class="sourceLine" id="cb8-11" title="11">    }</a>
+<a class="sourceLine" id="cb8-12" title="12"></a>
+<a class="sourceLine" id="cb8-13" title="13">    <span class="cf">return</span> color;</a>
+<a class="sourceLine" id="cb8-14" title="14">}</a></code></pre></div>
 <p>The code is simplified for conciseness and one can find real implementation in the <code>Scene.cpp</code> file.</p>
 <h3 id="refraction">Refraction</h3>
+<p>To implement transparent materials, we refered to an article in www.scratchapixel.com. We considered only completely transparent materials. Absorption at a surface or inside material does not exist in our implementation. When light meets a transparent object, some portion of the light is refracted and the remaining is reflected. We needed to calculate the direction of the refracted ray in addition to the reflected ray. Snell’s law determines the direction:</p>
+<p><span class="math inline">\(\frac{{\sf sin}\theta_1}{{\sf sin}\theta_2}=\frac{\eta_2}{\eta_1}\)</span></p>
+<p><span class="math inline">\(\theta_1\)</span> and <span class="math inline">\(\theta_2\)</span> are the angles of incidence and refraction, respectively. <span class="math inline">\(\eta_1\)</span> and <span class="math inline">\(\eta_2\)</span> are the indices of refraction of the air and the material of an object, respectively.</p>
+<p>By using the above facts, we can write the direction of the refracted ray <span class="math inline">\(T\)</span> as the following: <span class="math inline">\(T=\frac{\eta_1}{\eta_2}(I+{\sf cos}\theta_1 N)-N\sqrt{1-(\frac{\eta_1}{\eta_2})^2(1-{\sf cos}^2\theta_1)}\)</span> where <span class="math inline">\(N\)</span> is the normal vector. <span class="math inline">\(\eta_1\)</span> is always one in the code. <span class="math inline">\(\eta_2\)</span> is stored in variable <code>ior</code> in the code. One thing we have to notice is a critical angle. If an angle of incidence is larger than the critical angle, then light is fully reflected, not refracted. It happens when <span class="math inline">\(\sqrt{1-(\frac{\eta_1}{\eta_2})^2(1-{\sf cos}^2\theta_1)}\)</span> is negative.</p>
+<p>We can implement it as the following function:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb9-1" title="1">vec3 refract(vec3 v, vec3 n, <span class="dt">float</span> ior) {</a>
+<a class="sourceLine" id="cb9-2" title="2">    <span class="dt">float</span> cosi = max(min(dot(v, n), <span class="dv">1</span>), -<span class="dv">1</span>);</a>
+<a class="sourceLine" id="cb9-3" title="3">    <span class="dt">float</span> etai = <span class="dv">1</span>, etat = ior;</a>
+<a class="sourceLine" id="cb9-4" title="4">    vec3 normal_ref = n;</a>
+<a class="sourceLine" id="cb9-5" title="5">    <span class="cf">if</span> (cosi &lt; <span class="dv">0</span>) cosi = -cosi;</a>
+<a class="sourceLine" id="cb9-6" title="6">    <span class="cf">else</span> { etat = <span class="dv">1</span>; etai = ior; normal_ref = -n; }</a>
+<a class="sourceLine" id="cb9-7" title="7">    <span class="dt">float</span> eta = etai / etat;</a>
+<a class="sourceLine" id="cb9-8" title="8">    <span class="dt">float</span> k = <span class="dv">1</span> - eta * eta * (<span class="dv">1</span> - cosi * cosi);</a>
+<a class="sourceLine" id="cb9-9" title="9">    <span class="cf">return</span> (k &lt; <span class="dv">0</span>) ? vec3(<span class="dv">0</span>) : normalize(eta * v + (eta * cosi - sqrt(k)) * n);</a>
+<a class="sourceLine" id="cb9-10" title="10">}</a></code></pre></div>
+<p>The function returns the direction of the refracted ray. The code is simplified for conciseness and one can find real implementation in the <code>vec3.h</code> file.</p>
+<p>The Fresnel equations calculate the amount of reflected and refracted light:</p>
+<p><span class="math inline">\(F_{R\parallel}=(\frac{\eta_2{\sf cos}\theta_1-\eta_1{\sf cos}\theta_2}{\eta_2{\sf cos}\theta_1+\eta_1{\sf cos}\theta_2})^2\)</span></p>
+<p><span class="math inline">\(F_{R\perp}=(\frac{\eta_1{\sf cos}\theta_1-\eta_2{\sf cos}\theta_2}{\eta_1{\sf cos}\theta_1+\eta_2{\sf cos}\theta_2})^2\)</span></p>
+<p>By taking the average of the two values, we get the actual proportion of reflected light:</p>
+<p><span class="math inline">\(F_R=\frac{1}{2}(F_{R\parallel}+F_{R\perp})\)</span></p>
+<p>If <span class="math inline">\({\sf sin}\theta_2\)</span> (<code>sint</code> in the code) is larger than one, the function returns one because it means that the incidence angle is larger than the critical angle.</p>
+<p>We can implement it as the following function:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb10-1" title="1"><span class="dt">float</span> fresnel(vec3 v, vec3 n, <span class="dt">float</span> ior) {</a>
+<a class="sourceLine" id="cb10-2" title="2">    <span class="dt">float</span> cosi = max(min(dot(v, n), <span class="dv">1</span>), -<span class="dv">1</span>);</a>
+<a class="sourceLine" id="cb10-3" title="3">    <span class="dt">float</span> etai = <span class="dv">1</span>, etat = ior;</a>
+<a class="sourceLine" id="cb10-4" title="4">    <span class="cf">if</span> (cosi &gt; <span class="dv">0</span>) { etat = <span class="dv">1</span>; etai = ior; }</a>
+<a class="sourceLine" id="cb10-5" title="5">    <span class="dt">float</span> sint = etai / etat * sqrt(max(<span class="dv">1</span> - cosi * cosi, <span class="dv">0</span>));</a>
+<a class="sourceLine" id="cb10-6" title="6">    <span class="cf">if</span> (sint &gt;= <span class="dv">1</span>) <span class="cf">return</span> <span class="dv">1</span>;</a>
+<a class="sourceLine" id="cb10-7" title="7">    <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb10-8" title="8">        <span class="dt">float</span> cost = sqrt(max(<span class="dv">1</span> - sint * sint, <span class="dv">0</span>));</a>
+<a class="sourceLine" id="cb10-9" title="9">        cosi = abs(cosi);</a>
+<a class="sourceLine" id="cb10-10" title="10">        <span class="dt">float</span> Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));</a>
+<a class="sourceLine" id="cb10-11" title="11">        <span class="dt">float</span> Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));</a>
+<a class="sourceLine" id="cb10-12" title="12">        <span class="cf">return</span> (Rs * Rs + Rp * Rp) / <span class="dv">2</span>;</a>
+<a class="sourceLine" id="cb10-13" title="13">    }</a>
+<a class="sourceLine" id="cb10-14" title="14">}</a></code></pre></div>
+<p>The code is simplified for conciseness and one can find real implementation in the <code>vec3.h</code> file.</p>
+<p>The remaining is the proportion refracted.</p>
+<p><span class="math inline">\(F_T=1-F_R\)</span></p>
+<p>Finally, we calculate the colors of refracted and reflected rays using recurisive calls. The colors are mixed with weight <span class="math inline">\(F_R\)</span> (<code>kr</code> in the code) from the <code>fresnel</code> function.</p>
+<p>We add the following code into the <code>trace</code> function.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb11-1" title="1">vec3 trace(Ray ray, <span class="dt">int</span> depth) {</a>
+<a class="sourceLine" id="cb11-2" title="2">    ...</a>
+<a class="sourceLine" id="cb11-3" title="3">    <span class="kw">auto</span> recursive_trace = [&amp;](vec3 direction) {</a>
+<a class="sourceLine" id="cb11-4" title="4">        vec3 origin = point + margin * direction;</a>
+<a class="sourceLine" id="cb11-5" title="5">        Ray reflected_ray(origin, direction);</a>
+<a class="sourceLine" id="cb11-6" title="6">        <span class="cf">return</span> trace(reflected_ray, depth + <span class="dv">1</span>);</a>
+<a class="sourceLine" id="cb11-7" title="7">    };</a>
+<a class="sourceLine" id="cb11-8" title="8"></a>
+<a class="sourceLine" id="cb11-9" title="9">    <span class="cf">if</span> (material.transparent) {</a>
+<a class="sourceLine" id="cb11-10" title="10">        vec3 color_reflection = recursive_trace(reflect(ray.direction, normal));</a>
+<a class="sourceLine" id="cb11-11" title="11">        vec3 color_refraction = recursive_trace(refract(ray.direction, normal, material.ior));</a>
+<a class="sourceLine" id="cb11-12" title="12">        <span class="dt">float</span> kr = fresnel(ray.direction, normal, material.ior);</a>
+<a class="sourceLine" id="cb11-13" title="13">        <span class="cf">return</span> mix(color_refraction, color_reflection, kr);</a>
+<a class="sourceLine" id="cb11-14" title="14">    } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb11-15" title="15">    ...</a>
+<a class="sourceLine" id="cb11-16" title="16">}</a></code></pre></div>
+<p>The code is simplified for conciseness and one can find real implementation in the <code>Scene.cpp</code> file.</p>
 <h3 id="other-fractals">Other Fractals</h3>
+<h4 id="mandelbulb-fractal">Mandelbulb Fractal</h4>
+<p>We refered to a blog article written by Mikael Hvidtfeldt Christensen to render the Mandelbulb Fractals. The Mandelbulb fractals are similar to the Julia fractals. A fractal contains every <span class="math inline">\(z\)</span> such that <span class="math inline">\(f^n(z)\)</span> does not diverges as <span class="math inline">\(n\)</span> goes to the infinity where <span class="math inline">\(f(x)=x^2+z\)</span> and superscript <span class="math inline">\(n\)</span> denotes <span class="math inline">\(n\)</span>-fold application of the function. Christensen noted that we can use higher powers, <span class="math inline">\(f(x)=x^8+z\)</span> for example, to create more intersting images. According to Christensen, we can interpret the product as the rotation and scaling of a three-dimensional vector. Precisely, squaring a vector corresponds to squaring the length of the vector and doubling the angle of the vector.</p>
+<p>We can implement it as the following function:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb12-1" title="1"><span class="dt">float</span> de(vec3 point) {</a>
+<a class="sourceLine" id="cb12-2" title="2">    vec3 p = point;</a>
+<a class="sourceLine" id="cb12-3" title="3">    <span class="dt">float</span> dr = <span class="dv">1</span>, r;</a>
+<a class="sourceLine" id="cb12-4" title="4"></a>
+<a class="sourceLine" id="cb12-5" title="5">    <span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; iter; i++) {</a>
+<a class="sourceLine" id="cb12-6" title="6">        r = norm(p);</a>
+<a class="sourceLine" id="cb12-7" title="7"></a>
+<a class="sourceLine" id="cb12-8" title="8">        <span class="dt">float</span> theta = acos(p[<span class="dv">2</span>] / r);</a>
+<a class="sourceLine" id="cb12-9" title="9">        <span class="dt">float</span> phi = atan2(p[<span class="dv">1</span>], p[<span class="dv">0</span>]);</a>
+<a class="sourceLine" id="cb12-10" title="10">        dr = power * pow(r, power - <span class="dv">1</span>) * dr + <span class="dv">1</span>;</a>
+<a class="sourceLine" id="cb12-11" title="11"></a>
+<a class="sourceLine" id="cb12-12" title="12">        theta *= power;</a>
+<a class="sourceLine" id="cb12-13" title="13">        phi *= power;</a>
+<a class="sourceLine" id="cb12-14" title="14">        <span class="dt">float</span> st = sin(theta), ct = cos(theta), sp = sin(phi), cp = cos(phi);</a>
+<a class="sourceLine" id="cb12-15" title="15">        p = pow(r, power) * vec3(st * cp, st * sp, ct) + point;</a>
+<a class="sourceLine" id="cb12-16" title="16">    }</a>
+<a class="sourceLine" id="cb12-17" title="17"></a>
+<a class="sourceLine" id="cb12-18" title="18">    <span class="cf">return</span> <span class="fl">0.5</span> * log(r) * r / dr;</a>
+<a class="sourceLine" id="cb12-19" title="19">}</a></code></pre></div>
+<p>The code is simplified for conciseness and one can find real implementation in the <code>Objects.cpp</code> file.</p>
+<h4 id="sierpinski-tetrahedron">Sierpinski Tetrahedron</h4>
+<p>We can render Sierpinski tetrahedrons by defining a proper distance estimator. We refered to a blog article written by Christensen. However, the article did not discuss how to find the closest distance from a point to a tetrahedron. Therefore, we implemented a function calculating the distance by ourselves. The code is complex and long so that we omit it here. One can find real implementation in the <code>Tetra.cpp</code> file.</p>
 <h3 id="bezier-curve-based-camera-paths">Bezier-curve-based Camera Paths</h3>
+<p>Bezier curves are useful to create natural movements of a camera. Since the concept of Bezier curves is discussed in detail in the lecture, we do not explain it here. Now, the position of a camera is not fixed but changes as time passes.</p>
+<p>We add the following code into the <code>compute_vecs</code> function.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><a class="sourceLine" id="cb13-1" title="1"><span class="dt">void</span> compute_vecs() {</a>
+<a class="sourceLine" id="cb13-2" title="2">    vector&lt;vec3&gt; points = control_polygon;</a>
+<a class="sourceLine" id="cb13-3" title="3">    <span class="dt">double</span> t = time / duration;</a>
+<a class="sourceLine" id="cb13-4" title="4">    <span class="dt">int</span> length = points.size();</a>
+<a class="sourceLine" id="cb13-5" title="5">    <span class="cf">while</span> (length-- &gt; <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb13-6" title="6">        <span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; length; i++)</a>
+<a class="sourceLine" id="cb13-7" title="7">            points[i] = mix(points[i], points[i + <span class="dv">1</span>], t);</a>
+<a class="sourceLine" id="cb13-8" title="8">    eye = points[<span class="dv">0</span>];</a>
+<a class="sourceLine" id="cb13-9" title="9">    ...</a>
+<a class="sourceLine" id="cb13-10" title="10">}</a></code></pre></div>
+<p>The code is simplified for conciseness and one can find real implementation in the <code>Camera.cpp</code> file.</p>
+<h1 id="results">Results</h1>
+<h1 id="source-code">Source Code</h1>
+<h1 id="contributions">Contributions</h1>
+<h1 id="refrences">Refrences</h1>
+<ul>
+<li>Hart, John C., Daniel J. Sandin, and Louis H. Kauffman. “Ray tracing deterministic 3-D fractals.” ACM SIGGRAPH computer graphics. Vol. 23. No. 3. ACM, 1989.</li>
+<li><a href="https://en.wikipedia.org/wiki/Ambient_occlusion">https://en.wikipedia.org/wiki/Ambient_occlusion</a></li>
+<li><a href="https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel">https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel</a></li>
+<li><a href="http://blog.hvidtfeldts.net/index.php/2011/08/distance-estimated-3d-fractals-iii-folding-space/">http://blog.hvidtfeldts.net/index.php/2011/08/distance-estimated-3d-fractals-iii-folding-space/</a></li>
+<li><a href="http://blog.hvidtfeldts.net/index.php/2011/09/distance-estimated-3d-fractals-v-the-mandelbulb-different-de-approximations/">http://blog.hvidtfeldts.net/index.php/2011/09/distance-estimated-3d-fractals-v-the-mandelbulb-different-de-approximations/</a></li>
+</ul>
 </body>
 </html>
