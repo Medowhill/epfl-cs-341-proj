@@ -352,8 +352,1005 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <a class="sourceLine" id="cb13-10" title="10">}</a></code></pre></div>
 <p>The code is simplified for conciseness and one can find real implementation in the <code>Camera.cpp</code> file.</p>
 <h1 id="results">Results</h1>
+<h2 id="images">Images</h2>
+<p>Every image in this section is rendered using the following configuration:</p>
+<ul>
+<li>Camera</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Eye</td>
+<td style="text-align: center;">(-2, 0, 4)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Center</td>
+<td style="text-align: center;">(0, 0, 0)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Up</td>
+<td style="text-align: center;">(0, 1, 0)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Field of View (Y)</td>
+<td style="text-align: center;">45 deg</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Width</td>
+<td style="text-align: center;">640 px</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Height</td>
+<td style="text-align: center;">360 px</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Scene</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Background Color</td>
+<td style="text-align: center;">(0, 0, 0)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Ambience Light Color</td>
+<td style="text-align: center;">(0.2, 0.2, 0.2)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Light</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Position</td>
+<td style="text-align: center;">(-3, 1, 10)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Color</td>
+<td style="text-align: center;">(1, 1, 1)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Material</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Ambient Color</td>
+<td style="text-align: center;">(0.6, 0.6, 0.6)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Diffuse Color</td>
+<td style="text-align: center;">(0.6, 0.6, 0.6)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Specular Color</td>
+<td style="text-align: center;">(1, 1, 1)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Shininess</td>
+<td style="text-align: center;">50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Mirror</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+<p>Rendering times are measured in a Google Cloud Platform Compute Engine <code>n1-highcpu-8</code> instance.</p>
+<h3 id="julia-fractals">Julia Fractals</h3>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">d</td>
+<td style="text-align: center;">(-1, 0.2, 0, 0)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">k</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="images/julia/julia.png" alt="Simple" width="640" /><figcaption>Simple</figcaption>
+</figure>
+<figure>
+<img src="images/julia/julia_s.png" alt="Shadows" width="640" /><figcaption>Shadows</figcaption>
+</figure>
+<figure>
+<img src="images/julia/julia_ss.png" alt="Soft Shadows" width="640" /><figcaption>Soft Shadows</figcaption>
+</figure>
+<figure>
+<img src="images/julia/julia_a.png" alt="Ambient Occlusion" width="640" /><figcaption>Ambient Occlusion</figcaption>
+</figure>
+<figure>
+<img src="images/julia/julia_s_a.png" alt="Shadows and Ambient Occlusion" width="640" /><figcaption>Shadows and Ambient Occlusion</figcaption>
+</figure>
+<figure>
+<img src="images/julia/julia_ss_a.png" alt="Soft Shadows and Ambient Occlusion" width="640" /><figcaption>Soft Shadows and Ambient Occlusion</figcaption>
+</figure>
+<ul>
+<li>Rendering Times in Milliseconds</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">No shadows</th>
+<th style="text-align: center;">Simple shadows</th>
+<th style="text-align: center;">Soft shadows</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Constant ambience</td>
+<td style="text-align: center;">168.054</td>
+<td style="text-align: center;">193.242</td>
+<td style="text-align: center;">3266.59</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Ambient occlusion</td>
+<td style="text-align: center;">3099.13</td>
+<td style="text-align: center;">3147.36</td>
+<td style="text-align: center;">6135.28</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mandelbulb-fractals">Mandelbulb Fractals</h3>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">power</td>
+<td style="text-align: center;">8</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="images/mandelbulb/mandelbulb.png" alt="Simple" width="640" /><figcaption>Simple</figcaption>
+</figure>
+<figure>
+<img src="images/mandelbulb/mandelbulb_s.png" alt="Shadows" width="640" /><figcaption>Shadows</figcaption>
+</figure>
+<figure>
+<img src="images/mandelbulb/mandelbulb_ss.png" alt="Soft Shadows" width="640" /><figcaption>Soft Shadows</figcaption>
+</figure>
+<figure>
+<img src="images/mandelbulb/mandelbulb_a.png" alt="Ambient Occlusion" width="640" /><figcaption>Ambient Occlusion</figcaption>
+</figure>
+<figure>
+<img src="images/mandelbulb/mandelbulb_s_a.png" alt="Shadows and Ambient Occlusion" width="640" /><figcaption>Shadows and Ambient Occlusion</figcaption>
+</figure>
+<figure>
+<img src="images/mandelbulb/mandelbulb_ss_a.png" alt="Soft Shadows and Ambient Occlusion" width="640" /><figcaption>Soft Shadows and Ambient Occlusion</figcaption>
+</figure>
+<ul>
+<li>Rendering Times in Milliseconds</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">No shadows</th>
+<th style="text-align: center;">Simple shadows</th>
+<th style="text-align: center;">Soft shadows</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Constant ambience</td>
+<td style="text-align: center;">691.276</td>
+<td style="text-align: center;">938.761</td>
+<td style="text-align: center;">23244.7</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Ambient occlusion</td>
+<td style="text-align: center;">23462.8</td>
+<td style="text-align: center;">23666</td>
+<td style="text-align: center;">46639.2</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sierpinski-tetrahedron-1">Sierpinski Tetrahedron</h3>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">size</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">iter</td>
+<td style="text-align: center;">4</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="images/tetra/tetra.png" alt="Simple" width="640" /><figcaption>Simple</figcaption>
+</figure>
+<figure>
+<img src="images/tetra/tetra_s.png" alt="Shadows" width="640" /><figcaption>Shadows</figcaption>
+</figure>
+<figure>
+<img src="images/tetra/tetra_ss.png" alt="Soft Shadows" width="640" /><figcaption>Soft Shadows</figcaption>
+</figure>
+<figure>
+<img src="images/tetra/tetra_a.png" alt="Ambient Occlusion" width="640" /><figcaption>Ambient Occlusion</figcaption>
+</figure>
+<figure>
+<img src="images/tetra/tetra_s_a.png" alt="Shadows and Ambient Occlusion" width="640" /><figcaption>Shadows and Ambient Occlusion</figcaption>
+</figure>
+<figure>
+<img src="images/tetra/tetra_ss_a.png" alt="Soft Shadows and Ambient Occlusion" width="640" /><figcaption>Soft Shadows and Ambient Occlusion</figcaption>
+</figure>
+<ul>
+<li>Rendering Times in Milliseconds</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">No shadows</th>
+<th style="text-align: center;">Simple shadows</th>
+<th style="text-align: center;">Soft shadows</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Constant ambience</td>
+<td style="text-align: center;">2800.13</td>
+<td style="text-align: center;">3477.99</td>
+<td style="text-align: center;">82592.9</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Ambient occlusion</td>
+<td style="text-align: center;">92200.2</td>
+<td style="text-align: center;">92943.7</td>
+<td style="text-align: center;">171737</td>
+</tr>
+</tbody>
+</table>
+<h2 id="videos">Videos</h2>
+<h3 id="julia-fractals-1">Julia Fractals</h3>
+<ul>
+<li>Camera</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Control Polygon</td>
+<td style="text-align: center;">(-1, 0, 4.5)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-1.5, 0, 3)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(8, -0.5, 4)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(3.5, -1, -7)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-4, -1.5, -2)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-0.5, -2, 1)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-0.25, -4, 0.5)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Width</td>
+<td style="text-align: center;">1280 px</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Height</td>
+<td style="text-align: center;">720 px</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">FPS</td>
+<td style="text-align: center;">30</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Frames</td>
+<td style="text-align: center;">201</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Light</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Position 1</td>
+<td style="text-align: center;">(-5, 0, 10)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Color 1</td>
+<td style="text-align: center;">(0.8, 0.8, 0.8)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Position 2</td>
+<td style="text-align: center;">(5, 0, -10)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Color 2</td>
+<td style="text-align: center;">(0.8, 0.8, 0.8)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Material</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Ambient Color</td>
+<td style="text-align: center;">(0.6, 0.6, 0.6)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Diffuse Color</td>
+<td style="text-align: center;">(0.6, 0.6, 0.6)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Specular Color</td>
+<td style="text-align: center;">(1, 1, 1)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Shininess</td>
+<td style="text-align: center;">50</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Parameters</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">d</td>
+<td style="text-align: center;">(-1, 0.2, 0, 0)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">k</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+<video width="640" height="360" src="videos/julia.mp4" controls></video>
+<ul>
+<li>Camera</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Control Polygon</td>
+<td style="text-align: center;">(-1, 0, 4.5)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-0.5, -1, 2)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(0, 4, 0)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-2, 2, -0.5)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-1, 2, -1)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(2, 0, -2)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Width</td>
+<td style="text-align: center;">1280 px</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Height</td>
+<td style="text-align: center;">720 px</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">FPS</td>
+<td style="text-align: center;">30</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Frames</td>
+<td style="text-align: center;">201</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Scene</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Background Color</td>
+<td style="text-align: center;">(0, 0, 0)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Ambience Light Color</td>
+<td style="text-align: center;">(0.2, 0.2, 0.2)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Light</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Position 1</td>
+<td style="text-align: center;">(-5, 0, 10)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Color 1</td>
+<td style="text-align: center;">(0.8, 0.8, 0.8)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Position 2</td>
+<td style="text-align: center;">(5, 0, -10)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Color 2</td>
+<td style="text-align: center;">(0.8, 0.8, 0.8)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Material</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Ambient Color</td>
+<td style="text-align: center;">(0.6, 0.6, 0.6)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Diffuse Color</td>
+<td style="text-align: center;">(0.6, 0.6, 0.6)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Specular Color</td>
+<td style="text-align: center;">(1, 1, 1)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Shininess</td>
+<td style="text-align: center;">50</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Parameters</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">d</td>
+<td style="text-align: center;">(-0.213,-0.0410,-0.563,-0.560)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">k</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+<video width="640" height="360" src="videos/julia2.mp4" controls></video>
+<ul>
+<li>Camera</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Control Polygon</td>
+<td style="text-align: center;">(-1, 0, 4.5)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-1.5, 0, 3)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(8, -0.5, 4)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(3.5, -1, -7)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-4, -1.5, -2)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-0.5, -2, 1)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-0.25, -4, 0.5)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Width</td>
+<td style="text-align: center;">1280 px</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Height</td>
+<td style="text-align: center;">720 px</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">FPS</td>
+<td style="text-align: center;">30</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Frames</td>
+<td style="text-align: center;">201</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Light</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Position</td>
+<td style="text-align: center;">(3, 3, 3)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Color</td>
+<td style="text-align: center;">(1, 1, 1)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Material</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Transparent</td>
+<td style="text-align: center;">true</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Index of Refraction</td>
+<td style="text-align: center;">1.5</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Parameters</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">d</td>
+<td style="text-align: center;">(-1, 0.2, 0, 0)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">k</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+<video width="640" height="360" src="videos/glass.mp4" controls></video>
+<h3 id="mandelbulb-fractals-1">Mandelbulb Fractals</h3>
+<ul>
+<li>Camera</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Control Polygon</td>
+<td style="text-align: center;">(-1, 0, 4.5)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-1.5, 0, 3)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(0, 4, 0)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(6, 0, 3)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(6, -1, -3)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-3, -2, -1.5)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-3, -3, -1.5)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Width</td>
+<td style="text-align: center;">640 px</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Height</td>
+<td style="text-align: center;">360 px</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">FPS</td>
+<td style="text-align: center;">30</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Frames</td>
+<td style="text-align: center;">201</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Light</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Position 1</td>
+<td style="text-align: center;">(-5, 0, 10)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Color 1</td>
+<td style="text-align: center;">(0.8, 0.8, 0.8)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Position 2</td>
+<td style="text-align: center;">(5, 0, -10)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Color 2</td>
+<td style="text-align: center;">(0.8, 0.8, 0.8)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Material</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Ambient Color</td>
+<td style="text-align: center;">(0.6, 0.6, 0.6)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Diffuse Color</td>
+<td style="text-align: center;">(0.6, 0.6, 0.6)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Specular Color</td>
+<td style="text-align: center;">(1, 1, 1)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Shininess</td>
+<td style="text-align: center;">50</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Parameters</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">power</td>
+<td style="text-align: center;">8</td>
+</tr>
+</tbody>
+</table>
+<video width="640" height="360" src="videos/mandelbulb.mp4" controls></video>
+<h3 id="sierpinski-tetrahedron-2">Sierpinski Tetrahedron</h3>
+<ul>
+<li>Camera</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Control Polygon</td>
+<td style="text-align: center;">(-4, -4, 0)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(-2.5, -2.5, 0)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(2.5, -2.5, 0)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(2.2, 0, 2.2)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(2.2, 0, -2.2)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(2.2, 2.2, -2.2)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;">(0.1, 0.1, -0.1)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Width</td>
+<td style="text-align: center;">640 px</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Height</td>
+<td style="text-align: center;">360 px</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">FPS</td>
+<td style="text-align: center;">30</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Frames</td>
+<td style="text-align: center;">201</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Light</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Position 1</td>
+<td style="text-align: center;">(-5, 0, 10)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Color 1</td>
+<td style="text-align: center;">(0.8, 0.8, 0.8)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Position 2</td>
+<td style="text-align: center;">(5, 0, -10)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Color 2</td>
+<td style="text-align: center;">(0.8, 0.8, 0.8)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Material</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Ambient Color</td>
+<td style="text-align: center;">(0.8, 0.8, 0.8)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Diffuse Color</td>
+<td style="text-align: center;">(0.8, 0.8, 0.8)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Specular Color</td>
+<td style="text-align: center;">(1, 1, 1)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Shininess</td>
+<td style="text-align: center;">100</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Parameters</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Property</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">size</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">iter</td>
+<td style="text-align: center;">4</td>
+</tr>
+</tbody>
+</table>
+<video width="640" height="360" src="videos/tetra.mp4" controls></video>
 <h1 id="source-code">Source Code</h1>
+<ul>
+<li><a href="files/group7.zip">ZIP file</a></li>
+<li><a href="https://github.com/Medowhill/epfl-cs-341-proj">GitHub repository</a></li>
+</ul>
 <h1 id="contributions">Contributions</h1>
+<ul>
+<li>Jaemin Hong: 50% (Implemented ray marching, normal estimation, distance estimators, soft shadows, and ambient occlusion)</li>
+<li>Hyojin Kook: 50% (Implemented refraction and reviewed the code)</li>
+</ul>
 <h1 id="refrences">Refrences</h1>
 <ul>
 <li>Hart, John C., Daniel J. Sandin, and Louis H. Kauffman. “Ray tracing deterministic 3-D fractals.” ACM SIGGRAPH computer graphics. Vol. 23. No. 3. ACM, 1989.</li>
